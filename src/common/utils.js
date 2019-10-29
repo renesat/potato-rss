@@ -1,7 +1,6 @@
 
-function routerWrap(router) {
-    let localRouter = router;
-    return app => app.use('/', localRouter);
-}
+const routerWrap = (router) => {
+  return (app) => app.use('/', router);
+};
 
 module.exports.routerWrap = routerWrap;

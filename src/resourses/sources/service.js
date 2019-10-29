@@ -1,9 +1,9 @@
 
 const getSourcesList = (userId) => {
-    const sourcesList = [
-        {'id': 1, 'name': 'Habr'}
-    ]
-    return sourcesList
-}
+  const sourcesList = [
+    {'id': 1, 'name': 'Habr'},
+  ];
+  return sourcesList;
+};
 
-module.exports.getSourcesList =  getSourcesList;
+module.exports.getSourcesList = getSourcesList;
