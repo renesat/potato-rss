@@ -9,5 +9,4 @@ const getSources = async (req, res) => {
 
 let router = Router();
 router.get('/sources', getSources)
-
 module.exports = router;
