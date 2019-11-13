@@ -7,7 +7,7 @@ const resoursesList = [
   'sources',
 ];
 for (let i = 0; i < resoursesList.length; i++) {
-  require('./' + resoursesList[i])(router);
+  router.use('/', router);
 }
 
-module.exports = routerWrap(router);
+module.exports = router;

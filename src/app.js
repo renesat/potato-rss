@@ -20,7 +20,7 @@ api.use(bodyParser.json());
 
 // Add routes
 const resourceRouter = require('./resourses');
-resourceRouter(api);
+api.use('/', resourceRouter);
 
 // Start
 const app = express();
