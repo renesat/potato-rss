@@ -2,7 +2,7 @@ const {Router}= require('express');
 const service = require('./service');
 
 const getSources = async (req, res) => {
-  const sources = await service.getSourcesList(2); // TODO
+  const sources = await service.getSourcesList(); // TODO
   res.status(200).json(sources);
 };
 
