@@ -27,6 +27,12 @@ const notExistError = async (req, res) => {
 };
 
 const router = new Router();
+/**
+ * @swagger
+ * /news:
+ *   get:
+ *     description: get user news list
+ */
 router.get('/news', getNewsList);
 router.all('/news', notExistError);
 
