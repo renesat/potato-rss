@@ -1,15 +1,21 @@
+
+// TODO
 const getNewsList = (userId) => {
 };
 
+// TODO
 const addNews = () => {
 };
 
+// TODO
 const getNews = (idNews) => {
 };
 
+// TODO
 const changeNews = (idNews) => {
 };
 
+// TODO
 const deleteNews = (idNews) => {
 };
 

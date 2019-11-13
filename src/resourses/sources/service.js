@@ -1,3 +1,5 @@
+
+// TODO
 const getSourcesList = (userId) => {
   const sourcesList = [
     {'id': 1, 'name': 'Habr'},
@@ -5,15 +7,19 @@ const getSourcesList = (userId) => {
   return sourcesList;
 };
 
+// TODO
 const addSource = () => {
 };
 
+// TODO
 const getSource = (idSource) => {
 };
 
+// TODO
 const changeSource = (idSource) => {
 };
 
+// TODO
 const deleteSource = (idSource) => {
 };
 
