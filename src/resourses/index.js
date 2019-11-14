@@ -1,13 +1,13 @@
-const { Router } = require('express');
-const { routerWrap } = reqlib('/src/common/utils')
+const {Router} = require('express');
 
-
-let router = Router();
+const router = new Router();
 const resoursesList = [
-    'sources'
+  'sources',
+  'news',
 ];
-for (i in resoursesList) {
-    require('./' + resoursesList[i])(router)
+for (let i = 0; i < resoursesList.length; i++) {
+  const subRouter = require('./' + resoursesList[i]);
+  router.use('/', subRouter);
 }
 
-module.exports = routerWrap(router);
+module.exports = router;

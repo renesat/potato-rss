@@ -1,3 +1,9 @@
+# Docs
+doc/*.tex
+doc/_*
+doc/.auctex-auto
+
+
 # Logs
 logs
 *.log
