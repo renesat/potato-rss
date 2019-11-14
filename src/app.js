@@ -14,11 +14,23 @@ if (env === 'production') {
 // Modules
 const express = require('express');
 const bodyParser = require('body-parser');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 // const request = require('request');
 
 // App
 const api = express();
 api.use(bodyParser.json());
+
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerOptions = {
+  definition: YAML.load('./config/swagger.yaml'),
+  // Path to the API docs
+  apis: ['./**/router.js'],
+};
+
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+api.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Add routes
 const resourceRouter = require('./resourses');

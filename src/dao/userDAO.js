@@ -6,7 +6,7 @@ var userDAO = {
 
     	let values = [0, user.username, user.password, user.role, user.email, user.avatar];
 
-        db.run(`INSERT INTO USERS VALUES (?, ?, ?, ?, ?, ?)`, values, function(err) {
+        db.run('INSERT INTO USERS VALUES (?, ?, ?, ?, ?, ?)', values, function(err) {
 		    if (err) {
 		      return console.log(err.message);
 		    }
