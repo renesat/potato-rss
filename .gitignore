@@ -105,3 +105,7 @@ public
 
 # TernJS port file
 .tern-port
+
+# Sublime data
+.jshintrc
+.sublime-project*
