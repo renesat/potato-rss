@@ -23,7 +23,7 @@ const deleteNews = async (req, res) => {
 
 // TODO
 const notExistError = async (req, res) => {
-  res.status(400).send('');
+  res.status(405).send('');
 };
 
 const router = new Router();
