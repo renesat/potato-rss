@@ -7,4 +7,4 @@ module.exports.User = class User {
         this.email = email;
         this.avatar = avatar;
     }
-}
+};

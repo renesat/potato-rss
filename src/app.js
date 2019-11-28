@@ -8,9 +8,9 @@ global.reqlib = require('app-root-path').require;
  */
 const env = process.env.NODE_ENV || 'dev';
 if (env === 'production') {
-  global.appConfig = reqlib('/config/production.js');
+    global.appConfig = reqlib('/config/production.js');
 } else if (env === 'dev') {
-  global.appConfig = reqlib('/config/dev.js');
+    global.appConfig = reqlib('/config/dev.js');
 }
 
 /*

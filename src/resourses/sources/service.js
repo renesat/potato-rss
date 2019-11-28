@@ -1,10 +1,10 @@
 
 // TODO
 const getSourcesList = (userId) => {
-  const sourcesList = [
-    {'id': 1, 'name': 'Habr'},
-  ];
-  return sourcesList;
+    const sourcesList = [
+        {'id': 1, 'name': 'Habr'},
+    ];
+    return sourcesList;
 };
 
 // TODO
