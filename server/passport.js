@@ -1,4 +1,4 @@
-passport = require('passport');
+let passport = require('passport');
 
 module.exports = (api) => {
     api.use(passport.initialize());

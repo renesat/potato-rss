@@ -3,7 +3,7 @@ const YAML = require('yamljs');
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerOptions = {
     definition: YAML.load('./config/swagger.yaml'),
-    apis: ['./src/resourses/*/router.js'],
+    apis: ['./server/resourses/*/router.js'],
 };
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
