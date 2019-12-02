@@ -57,7 +57,7 @@ const createDB = (db) => {
             table.string('username', 255).notNullable().unique();
             table.string('password', 255).notNullable();
             table.string('email', 255).notNullable().unique();
-            table.binary('avatar', 255);
+            table.binary('avatar');
         }).then(() => {
             console.log('Created Table: users');
         });
