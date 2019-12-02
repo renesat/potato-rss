@@ -4,7 +4,7 @@ info:
   description: 'Web RSS reader'
   version: 0.1.0
 servers:
-- url: localhost:8080/api/v1
+- url: http://localhost:8080/api/v1
 tags:
 - name: user
   description: Work with account
@@ -24,6 +24,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+      security:
+        - bearerAuth: []
+    delete:
+      summary: Удалить пользователя
+    put:
+      summary: Изменить профиль
+  /user/registrate:
+    post:
+      summary: Создать пользователя
+  /user/auth:
+    post:
+      summary: Создать токен
+  /sources:
+    get:
+      summary: Список ресурсов
+    post:
+      summary: добавить ресурс
+  /sources/{sourceID}:
+    get:
+      summary: Получить информацию о ресурсе
+    put:
+      summary: Изменить ресурс
+    delete:
+      summary: Удалить ресурс
 components:
   schemas:
     User:
@@ -42,3 +66,7 @@ components:
           type: array
           items:
             type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
