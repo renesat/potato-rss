@@ -6,48 +6,174 @@ info:
 servers:
 - url: http://localhost:8080/api/v1
 tags:
+- name: authorization
+  description: Авторизация
 - name: user
-  description: Work with account
+  description: Работа с пользователями
+- name: source
+  description: Работа с ресурсами
 paths:
   /user:
     get:
       tags:
       - user
-      summary: Return user
+      summary: Получить пользователя
       responses:
         200:
-          description: successful operation
+          description: Успешно
           content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
       security:
         - bearerAuth: []
-    delete:
-      summary: Удалить пользователя
     put:
+      tags:
+        - user
       summary: Изменить профиль
+      requestBody:
+        description: Изменяемый пользователь
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - user
+      summary: Удалить пользователя
+      responses:
+        200:
+          description: successful operation
+      security:
+        - bearerAuth: []
   /user/registrate:
     post:
-      summary: Создать пользователя
+      tags:
+        - user
+      summary: Зарегестрировать пользователя
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
   /user/auth:
     post:
-      summary: Создать токен
+      tags:
+        - authorization
+      summary: Авторизовать пользователя
+      parameters: 
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+          description: Имя пользователя
+        - in: path
+          name: password
+          required: true
+          schema:
+            type: string
+          description: Пароль
+      responses:
+        200:
+          description: Успешно
+          content:
+            text/html:
+              schema:
+                type: string
   /sources:
     get:
+      tags:
+        - source
       summary: Список ресурсов
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Source'
     post:
-      summary: добавить ресурс
+      tags:
+        - source
+      summary: Добавить ресурс
+      requestBody:
+        description: Новый ресурс
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+    put:  
+      tags:
+        - source
+      summary: Изменить ресурс
+      requestBody:
+        description: Изменяемый ресурс
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
   /sources/{sourceID}:
     get:
+      tags:
+        - source
       summary: Получить информацию о ресурсе
-    put:
-      summary: Изменить ресурс
+      parameters:
+        - in: path
+          name: sourceID
+          schema:
+            type: integer
+          required: true
+          description: Id ресурса
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
     delete:
+      tags:
+        - source
       summary: Удалить ресурс
+      parameters:
+        - in: path
+          name: sourceID
+          schema:
+            type: integer
+          required: true
+          description: Id ресурса
+      responses:
+        200:
+          description: Успешно
 components:
   schemas:
     User:
@@ -56,16 +182,30 @@ components:
         id:
           type: integer
           format: int64
+        role_id:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+    Source:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
         title:
           type: string
         description:
           type: string
         link:
           type: string
-        tags:
-          type: array
-          items:
-            type: string
+        
   securitySchemes:
     bearerAuth:
       type: http
