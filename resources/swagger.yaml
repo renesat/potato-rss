@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: PotatoRSS
+  description: 'Web RSS reader'
+  version: 0.1.0
+servers:
+- url: localhost:8080/api/v1
+tags:
+- name: user
+  description: Work with account
+paths:
+  /user:
+    get:
+      tags:
+      - user
+      summary: Return user
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        link:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string

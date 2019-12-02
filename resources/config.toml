@@ -1,0 +1,10 @@
+[default]
+db_path =  './resources/default_db.sqlite'
+  [default.secure]
+  token_life_time = 1000000 # second
+
+[prod]
+
+[dev]
+
+[test]
