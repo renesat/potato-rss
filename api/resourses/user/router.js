@@ -25,6 +25,7 @@ const router = new Router();
 
 router.get(
     '/user',
+    passport.authenticate('bearer', { session: false }),
     getInfo
 );
 router.post(

@@ -8,5 +8,5 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
 module.exports = (api) => {
-    api.use('/$', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    api.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 };

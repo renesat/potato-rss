@@ -22,7 +22,7 @@ const passportAuth = async (username, password, done) => {
 const bearerAuth = async (accessToken, done) => {
     return await new db.Auth({
         token: accessToken
-    }).fetch({require: false, withRelated: ['user']}).then(async token => {
+    }).fetch({require: false, withRelated: ['user']}).then(token => {
         if (!token) {
             return done(null, false);
         }
@@ -30,7 +30,7 @@ const bearerAuth = async (accessToken, done) => {
             token.destroy();
             return done(null, false, {message: 'Token expired'});
         }
-        if (!token.user) {
+        if (!token.related('user')) {
             return done(null, false, {message: 'Unknown user'});
         }
         const user = token.related('user');
