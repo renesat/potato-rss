@@ -46,18 +46,9 @@ const create_test_base = async () => {
     });
 
     // Token
-    let token1_user1 = await new db.Auth({
+    let token_user1 = await new db.Auth({
         user_id: user1.id,
         token: '415e148d-6183-48bb-b27b-cca51f2dde96',
-        creation_time: Date.now(),
-        life_time: 10000000000000
-    }).save().then(token => {
-        console.log('Create token for user1');
-        return token;
-    });
-    let token2_user1 = await new db.Auth({
-        user_id: user1.id,
-        token: '53e0dea8-5e13-42da-b323-7b6fcfeb3eae',
         creation_time: Date.now(),
         life_time: 10000000000000
     }).save().then(token => {

@@ -24,13 +24,12 @@ const passportConfigurator = require('./passport');
 passportConfigurator(api);
 
 
-
 // Add swagger
 const swaggerUIConfigurator = require('./swagger');
 swaggerUIConfigurator(api);
 
 // Add routes
-const resourceRouter = require('./resourses');
+const resourceRouter = require('./resources');
 api.use('/', resourceRouter);
 
 /*

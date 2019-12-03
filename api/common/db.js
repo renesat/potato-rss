@@ -65,8 +65,8 @@ const createDB = (db) => {
         .createTable('auth', (table) => {
             table.increments('id');
             table.integer('user_id').notNullable()
-                .references('users.id');
-            table.string('token', 255).notNullable().unique();
+                .references('users.id').unique();
+            table.string('token', 255).notNullable().unique();;
             table.datetime('creation_time').notNullable();
             table.timestamp('life_time').notNullable();
         }).then(() => {
@@ -116,18 +116,43 @@ const User = db.model('User', {
     checkPassword(password) {
         return this.password == password;
     },
-    tokens() {
-        return this.hasMany('Auth');
+    token() {
+        return this.hasOne('Auth');
+    },
+    services() {
+        return this.hasMany('Source');
     },
     role() {
         return this.belongsTo('Role');
     }
 }, {
+    deleteUser(user) {
+        return new User({
+            id: user.id
+        }).fetch({withRelated: ['services', 'token']}).then(user => {
+            user.related('services').invokeThen('destroy');
+            user.related('token').destroy();
+            user.destroy();
+            return user;
+        });
+    }
 });
 
 const Source = db.model('Source', {
     tableName: 'sources',
+    news() {
+        return this.hasMany('News');
+    }
 }, {
+    deleteSource(idSource) {
+        return new Source({
+            id: idSource
+        }).fetch({withRelated: ['news']}).then(source => {
+            source.related('news').invokeThen('destroy');
+            source.destroy();
+            return source;
+        });
+    }
 });
 
 const Role = db.model('Role', {
@@ -136,6 +161,11 @@ const Role = db.model('Role', {
         return this.hasMany('User');
     }
 }, {
+    getRoleID(name) {
+        return new Role({name: name}).fetch().then(role => {
+            return role.id;
+        });
+    }
 });
 
 const Auth = db.model('Auth', {
