@@ -57,11 +57,11 @@ router.post(
     '/user/registrate',
     createUser
 );
-router.all('/user/registrate', notExistError)
+router.all('/user/registrate', notExistError);
 
 router.post(
     '/user/auth',
-    passport.authenticate('basic', { session: false }),
+    passport.authenticate('basic', {session: false}),
     createToken
 );
 router.all('/user/auth', notExistError);

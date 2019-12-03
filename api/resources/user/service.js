@@ -36,6 +36,11 @@ const createToken = async (user) => {
         }).save().then(token => {
             return token;
         });
+    }).catch(err => {
+        return {
+            error: 'server_error',
+            message: err.message
+        };
     });
 };
 

@@ -32,14 +32,41 @@ const notExistError = async (req, res) => {
 };
 
 const router = new Router();
-router.use(passport.authenticate('bearer', { session: false }))
-router.get('/sources', getSources);
-router.post('/sources', addSource);
-router.all('/sources', notExistError);
+router.get(
+    '/sources',
+    passport.authenticate('bearer', { session: false }),
+    getSources
+);
+router.post(
+    '/sources',
+    passport.authenticate('bearer', { session: false }),
+    addSource
+);
+router.all(
+    '/sources',
+    passport.authenticate('bearer', { session: false }),
+    notExistError
+);
 
-router.get('/sources/:idSource', getSource);
-router.put('/sources/:idSource', changeSource);
-router.delete('/sources/:idSource', deleteSource);
-router.all('/sources/:idSource', notExistError);
+router.get(
+    '/sources/:idSource',
+    passport.authenticate('bearer', { session: false }),
+    getSource
+);
+router.put(
+    '/sources/:idSource',
+    passport.authenticate('bearer', { session: false }),
+    changeSource
+);
+router.delete(
+    '/sources/:idSource',
+    passport.authenticate('bearer', { session: false }),
+    deleteSource
+);
+router.all(
+    '/sources/:idSource',
+    passport.authenticate('bearer', { session: false }),
+    notExistError
+);
 
 module.exports = router;

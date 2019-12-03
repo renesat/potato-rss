@@ -80,19 +80,6 @@ paths:
       tags:
         - authorization
       summary: Авторизовать пользователя
-      parameters: 
-        - in: path
-          name: username
-          required: true
-          schema:
-            type: string
-          description: Имя пользователя
-        - in: path
-          name: password
-          required: true
-          schema:
-            type: string
-          description: Пароль
       responses:
         200:
           description: Успешно
@@ -100,6 +87,8 @@ paths:
             text/html:
               schema:
                 type: string
+      security:
+        - basicAuth: []
   /sources:
     get:
       tags:
@@ -237,3 +226,6 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
+    basicAuth:
+      type: http
+      scheme: basic
