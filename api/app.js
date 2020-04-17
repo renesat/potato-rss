@@ -9,6 +9,7 @@ global.appConfig = {...config['default'], ...config[env]};
 /*
  * Load modules
  */
+const {notFoundPage} = require('./common/pages');
 const express = require('express');
 const bodyParser = require('body-parser');
 
@@ -37,6 +38,11 @@ api.use('/', resourceRouter);
  */
 const app = express();
 app.use('/api/v1', api);
+
+const notExistError = async (req, res) => {
+    res.status(405).send(notFoundPage(req.url));
+};
+app.all('*', notExistError);
 
 // Start
 const port = process.env.PORT || 8080;

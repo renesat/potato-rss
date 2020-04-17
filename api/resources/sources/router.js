@@ -1,6 +1,7 @@
 const {Router}= require('express');
 const service = require('./service');
 const passport = require('passport');
+const {notFoundPage} = require('../../common/pages');
 
 const getSources = async (req, res) => {
     const sources = await service.getSourcesList(req.user);
@@ -28,7 +29,7 @@ const deleteSource = async (req, res) => {
 };
 
 const notExistError = async (req, res) => {
-    res.status(405).send('');
+    res.status(405).send(notFoundPage(req.url));
 };
 
 const router = new Router();
@@ -44,7 +45,6 @@ router.post(
 );
 router.all(
     '/sources',
-    passport.authenticate('bearer', { session: false }),
     notExistError
 );
 
@@ -65,7 +65,6 @@ router.delete(
 );
 router.all(
     '/sources/:idSource',
-    passport.authenticate('bearer', { session: false }),
     notExistError
 );
 

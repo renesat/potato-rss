@@ -1,4 +1,3 @@
-
 const db = require('../../common/db');
 
 const getSourcesList = (user) => {

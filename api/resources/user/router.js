@@ -1,6 +1,7 @@
 const {Router}= require('express');
 const service = require('./service');
 const passport = require('passport');
+const {notFoundPage} = require('../../common/pages');
 
 const createUser = async (req, res) => {
     const user = await service.createUser(req.body);
@@ -31,7 +32,7 @@ const deleteUser = async (req, res) => {
 };
 
 const notExistError = async (req, res) => {
-    res.status(405).send('');
+    res.status(405).send(notFoundPage(req.url));
 };
 
 const router = new Router();
