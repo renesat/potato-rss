@@ -37,7 +37,7 @@ const getSource = (idSource) => {
                 error: 'not_found',
                 message: 'Not found source ${idSource}'
             };
-        };
+        }
         return source;
     }).catch(err => {
         return {
@@ -48,15 +48,15 @@ const getSource = (idSource) => {
 };
 
 const changeSource = (idSource, data) => {
-    delete data.user_id;
+    delete data._id;
     delete data.id;
     return new db.Source().where({
         id: idSource
     }).save(data, {patch: true}).then(source => {
         if (!source) {
             return {
-                error: "not_found",
-                message: "Not found source ${idSource}"
+                error: 'not_found',
+                message: 'Not found source ${idSource}'
             }
         }
         return source;
@@ -67,6 +67,12 @@ const changeSource = (idSource, data) => {
         };
     });
 };
+
+// TODO
+const addNews = () => {
+
+};
+
 
 const deleteSource = (idSource) => {
     return db.Source.deleteSource(idSource);
