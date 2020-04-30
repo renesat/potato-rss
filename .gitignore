@@ -109,3 +109,6 @@ public
 # Sublime data
 .jshintrc
 .sublime-project*
+
+# DB
+resources/default_db.sqlite
