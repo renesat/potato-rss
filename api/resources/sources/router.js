@@ -14,7 +14,7 @@ const addSource = async (req, res) => {
 };
 
 const getSource = async (req, res) => {
-    const source = await service.getSource(req.params.idSource);
+    const source = await service.getSource(req.user, req.params.idSource);
     res.status(200).json(source);
 };
 
@@ -47,6 +47,17 @@ router.all(
     '/sources',
     notExistError
 );
+
+// router.get(
+//     '/sources/update',
+//     passport.authenticate('bearer', { session: false }),
+//     updateNews
+// );
+router.all(
+    '/sources/update',
+    notExistError
+);
+
 
 router.get(
     '/sources/:idSource',

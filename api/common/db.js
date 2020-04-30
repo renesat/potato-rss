@@ -125,20 +125,35 @@ const User = db.model('User', {
     token() {
         return this.hasOne('Auth');
     },
-    services() {
+    sources() {
         return this.hasMany('Source');
     },
     role() {
         return this.belongsTo('Role');
-    }
-}, {
-    deleteUser(user) {
+    },
+    delete() {
         return new User({
-            id: user.id
-        }).fetch({withRelated: ['services', 'token']}).then(user => {
-            user.related('services').invokeThen('destroy');
+            id: this.id
+        }).fetch({withRelated: ['sources', 'token']}).then(user => {
+            user.related('sources').invokeThen('destroy');
             user.related('token').destroy();
             user.destroy();
+            return this;
+        });
+    },
+    refreshToken() {
+        return Auth.refreshUserToken(this.id);
+    },
+    update(data) {
+        delete data.role_id;
+        delete data.id;
+        return this.save(data, {patch: true}).then(user => {
+            return user;
+        });
+    }
+}, {
+    createUser(userData) {
+        return new User(userData).save().then(user => {
             return user;
         });
     }
@@ -148,8 +163,60 @@ const Source = db.model('Source', {
     tableName: 'sources',
     news() {
         return this.hasMany('News');
+    },
+    user() {
+        return this.belongsTo('User');
     }
 }, {
+    updateNews(user_id = undefined, source_id =  undefined) {
+        return Source.where({
+            // user_id: user_id,
+            // id: source_id
+        }).fetchAll().then(sources => {
+            sources.forEach(async source => {
+                let items = await getNews(source.attributes.link);
+                if (items) {
+                    for (let i in items) {
+                        await News.updateNewsData(
+                            source.id,
+                            items[i]
+                        );
+                    }
+                }
+            });
+        });
+    },
+    updateSource(user_id, id_source, data) {
+        return new Source({
+            id: id_source,
+            user_id: user_id
+        }).save(data, {patch: true}).then(source => {
+            return source;
+        });
+    },
+    getInfo(user_id, id_source) {
+        return new Source({
+            id: id_source,
+            user_id: user_id
+        }).fetch({require: true}).then(source => {
+            return source;
+        });
+    },
+    createSource(user_id, data) {
+        return new Source({
+            user_id: user_id,
+            ...data
+        }).save().then(source => {
+            return source;
+        });
+    },
+    getUserSources(user_id) {
+        return Source.where({
+            user_id: user_id
+        }).fetchAll().then(sources => {
+            return sources;
+        });
+    },
     deleteSource(idSource) {
         return new Source({
             id: idSource
@@ -186,6 +253,36 @@ const Auth = db.model('Auth', {
         return diffTime < this.get('life_time');
     }
 }, {
+    generateToken() {
+        const uuidv4 = require('uuid/v4');
+        return {
+            token: uuidv4(),
+            creation_time: Date.now(),
+            life_time: global.appConfig['secure']['token_life_time']
+        };
+    },
+    createToken(user_id, token) {
+        return new Auth({
+            user_id: user_id,
+            ...token
+        }).save().then(token => {
+            return token;
+        });
+    },
+    refreshUserToken(user_id) {
+        return new Auth({
+            user_id: user_id
+        }).fetch({require: false}).then(token => {
+            if (token) {
+                token.destroy();
+            }
+            const new_token = Auth.generateToken();
+            return Auth.createToken(
+                user_id,
+                new_token
+            );
+        });
+    }
 });
 
 

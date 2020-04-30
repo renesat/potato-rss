@@ -1,11 +1,9 @@
 const db = require('../../common/db');
 
-const getSourcesList = (user) => {
-    return new db.Source({
-        user_id: user.id
-    }).fetchAll({require: false}).then(sources => {
-        return sources;
-    }).catch(err => {
+const getSourcesList = async (user) => {
+    return db.Source.getUserSources(
+        user.id
+    ).catch (err => {
         return {
             error: 'server_error',
             message: err.message
@@ -13,13 +11,11 @@ const getSourcesList = (user) => {
     });
 };
 
-const addSource = (user, data) => {
-    return new db.Source({
-        user_id: user.id,
-        ...data
-    }).save().then(source => {
-        return source;
-    }).catch(err => {
+const addSource = async (user, data) => {
+    return db.Source.createSource(
+        user.id,
+        data
+    ).catch(err => {
         return {
             error: 'server_error',
             message: err.message
@@ -27,18 +23,17 @@ const addSource = (user, data) => {
     });
 };
 
-const getSource = (idSource) => {
-    return new db.Source({
-        id: idSource
-    }).fetch({require: false}).then(source => {
-        if (!source) {
+const getSource = async (user, id_source) => {
+    return db.Source.getInfo(
+        user.id,
+        id_source
+    ).catch(err => {
+        if (err.message === 'EmptyResponse') {
             return {
                 error: 'not_found',
-                message: 'Not found source ${idSource}'
+                message: `Not found source ${id_source}`
             };
         }
-        return source;
-    }).catch(err => {
         return {
             error: 'server_error',
             message: err.message
@@ -46,32 +41,26 @@ const getSource = (idSource) => {
     });
 };
 
-const changeSource = (idSource, data) => {
+const changeSource = (user, id_source, data) => {
     delete data._id;
     delete data.id;
-    return new db.Source().where({
-        id: idSource
-    }).save(data, {patch: true}).then(source => {
-        if (!source) {
+    return db.Source.updateSource(
+        user.id,
+        id_source,
+        data
+    ).catch(err => {
+        if (err.message === 'EmptyResponse') {
             return {
                 error: 'not_found',
-                message: 'Not found source ${idSource}'
-            }
+                message: `Not found source ${id_source}`
+            };
         }
-        return source;
-    }).catch(err => {
         return {
             error: 'server_error',
             message: err.message
         };
     });
 };
-
-// TODO
-const addNews = () => {
-
-};
-
 
 const deleteSource = (idSource) => {
     return db.Source.deleteSource(idSource);
