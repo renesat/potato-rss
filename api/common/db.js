@@ -1,3 +1,5 @@
+const {getNews} = require('./rss');
+
 const knex = require('knex')({
     client: 'sqlite3',
     connection: {
@@ -115,6 +117,75 @@ const News = db.model('News', {
         return this.belongsTo('Source');
     }
 }, {
+    async updateNewsData(source_id, data) {
+        const news = News.where({
+            source_id: source_id,
+            guid: data['guid']
+            // rss_data_hash: data['rss_data_hash']
+        }).fetch({require: false}).then(news => {
+            return news;
+        });
+        if (!await news) {
+            return new News({
+                source_id: source_id,
+                ...data
+            }).save().then(news => {
+                return news;
+            });
+        } else {
+            if ((await news).attributes.rss_data_hash === data['rss_data_hash']) {
+                return news;
+            } else {
+                return new News({
+                    id: (await news).attributes.id
+                }).save(data, {patch: true}).then(news => {
+                    return news;
+                });
+            }
+        }
+    },
+    getNews(news_id) {
+        return new News({
+            id: news_id
+        }).fetch().then(news => {
+            return news;
+        });
+    },
+    getUserNewsList(user_id) {
+        return Source.with({
+            user_id: user_id
+        }).fetchAll({require: false, withRelated: ['news']}).then(sources => {
+            let newsList = [];
+            for (let i in sources) {
+                let source = sources[i];
+                if (source.related('news')) {
+                    newsList.push.apply(
+                        newsList,
+                        source.related('news')
+                    );
+                }
+            }
+            return newsList;
+        });
+    },
+    getNewsList(source_id) {
+        return News.where({
+            source_id: source_id
+        }).fetchAll().then(newsList => {
+            return newsList;
+        });
+    },
+    updateNews(news_id, data) {
+        return new News({
+            id: news_id,
+        }).fetch().then(_user => { // eslint-disable-line no-unused-vars
+            return new News({
+                id: news_id,
+            }).save(data, {patch: true}).then(news => {
+                return news;
+            });
+        });
+    }
 });
 
 const User = db.model('User', {

@@ -44,6 +44,16 @@ const notExistError = async (req, res) => {
 };
 app.all('*', notExistError);
 
+// Set loop news update
+const db = require('./common/db');
+setInterval(
+    async () => {
+        await console.log('Update all news...');
+        return await db.Source.updateNews();
+    },
+    global.appConfig['news_update_time'] * 1000
+);
+
 // Start
 const port = process.env.PORT || 8080;
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
