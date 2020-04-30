@@ -27,7 +27,7 @@
     "passport-oauth2-client-password": "^0.1.2",
     "request": "^2.88.2",
     "rss-parser": "^3.7.6",
-    "sqlite3": "^4.1.1",
+    "sqlite3": "^4.2.0",
     "swagger-jsdoc": "^3.7.0",
     "swagger-ui-express": "^4.1.4",
     "toml": "^3.0.0",
