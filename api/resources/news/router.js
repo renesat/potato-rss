@@ -2,12 +2,12 @@ const {Router}= require('express');
 const service = require('./service');
 
 const getNewsList = async (req, res) => {
-    const news = await service.getNewsList(2); // TODO
+    const news = await service.getNewsList(req.user);
     res.status(200).json(news);
 };
 
 const getNews = async (req, res) => {
-    const news = await service.getNews(res.params.idNews); // TODO
+    const news = await service.getNews(res.params.news_id);
     res.status(200).json(news);
 };
 
@@ -16,12 +16,11 @@ const changeNews = async (req, res) => {
     res.status(200).json(news);
 };
 
-const deleteNews = async (req, res) => {
-    await service.deleteNews(res.params.idNews); // TODO
-    res.status(200).send('');
-};
+// const deleteNews = async (req, res) => {
+//     await service.deleteNews(res.params.idNews); // TODO
+//     res.status(200).send('');
+// };
 
-// TODO
 const notExistError = async (req, res) => {
     res.status(405).send();
 };
@@ -32,7 +31,7 @@ router.all('/news', notExistError);
 
 router.get('/news/:idNews', getNews);
 router.patch('/news/:idNews', changeNews);
-router.delete('/news/:idNews', deleteNews);
+// router.delete('/news/:idNews', deleteNews);
 router.all('/news/:idNews', notExistError);
 
 module.exports = router;

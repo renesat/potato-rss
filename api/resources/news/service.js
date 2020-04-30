@@ -1,27 +1,53 @@
+const db = require('../../common/db');
 
-// TODO
-const getNewsList = (userId) => {
+const getNewsList = (user) => {
+    return db.News.getUserNewsList(
+        user.id
+    ).catch(err => {
+        return {
+            error: 'server_error',
+            message: err.message
+        };
+    });
 };
 
-// TODO
-const addNews = () => {
+const getNews = (news_id) => {
+    return db.News.getNews(
+        news_id
+    ).catch(err => {
+        if (err.message === 'EmptyResponse') {
+            return {
+                error: 'not_found',
+                message: `Not found news ${news_id}`
+            };
+        }
+        return {
+            error: 'server_error',
+            message: err.message
+        };
+    });
 };
 
-// TODO
-const getNews = (idNews) => {
+const changeNews = (news_id, data) => {
+    const new_data = {
+        favourite: data['facourite']
+    };
+    return db.News.updateNews(
+        news_id, new_data
+    ).catch(err => {
+        if (err.message === 'EmptyResponse') {
+            return {
+                error: 'not_found',
+                message: `Not found news ${news_id}`
+            };
+        }
+        return {
+            error: 'server_error',
+            message: err.message
+        };
+    });
 };
-
-// TODO
-const changeNews = (idNews) => {
-};
-
-// TODO
-const deleteNews = (idNews) => {
-};
-
 
 module.exports.getNewsList = getNewsList;
-module.exports.addNews = addNews;
 module.exports.getNews = getNews;
 module.exports.changeNews = changeNews;
-module.exports.deleteNews = deleteNews;

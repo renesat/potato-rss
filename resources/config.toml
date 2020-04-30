@@ -1,4 +1,5 @@
 [default]
+news_update_time = 300 # second
 db_path =  './resources/default_db.sqlite'
   [default.secure]
   token_life_time = 13824000 # second (160 days)
