@@ -1,0 +1,668 @@
+{
+	"info": {
+		"_postman_id": "16889a31-acee-44c3-b5ab-698e79110b32",
+		"name": "potato-rss",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User 1",
+			"item": [
+				{
+					"name": "Create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "bdb1dd09-f28a-47ff-b794-891e7e48f8f8",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"username\", jsonData[\"username\"]);",
+									"pm.environment.set(\"password\", jsonData[\"password\"]);",
+									"pm.environment.set(\"email\", jsonData[\"email\"]);",
+									"pm.environment.set(\"user\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "{{$randomEmail}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{$randomWord}}\",\n  \"password\": \"{{$randomPassword}}\",\n  \"email\": \"{{$randomEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/user/registrate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"registrate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "de17f48c-eca5-4113-8bf3-cbbc08222446",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"token_data\", JSON.stringify(jsonData));",
+									"pm.environment.set(\"token\", jsonData[\"token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/auth",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fba37b2f-63cb-41b2-b8f3-40c43e30ecb2",
+								"exec": [
+									"pm.test(\"Test username\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.username).to.eql(",
+									"        pm.variables.get(\"username\")",
+									"    );",
+									"});",
+									"",
+									"pm.test(\"Test password\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.eql(",
+									"        pm.variables.get(\"password\")",
+									"    );",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change profile",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "4d9613af-5017-4d82-a807-9ae00c85670c",
+								"exec": [
+									"pm.environment.set(",
+									"    \"new_username\", ",
+									"    pm.variables.replaceIn('{{$randomWord}}')",
+									");",
+									"pm.environment.set(",
+									"    \"new_password\", ",
+									"    pm.variables.replaceIn('{{$randomPassword}}')",
+									");",
+									"pm.environment.set(",
+									"    \"new_email\", ",
+									"    pm.variables.replaceIn('{{$randomEmail}}')",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "d9bdc6e0-665d-46f1-9be4-3456a87eeeae",
+								"exec": [
+									"pm.test(\"Test username\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.username).to.eql(",
+									"        pm.variables.get(\"new_username\")",
+									"    );",
+									"});",
+									"",
+									"pm.test(\"Test password\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.eql(",
+									"        pm.variables.get(\"new_password\")",
+									"    );",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"username\", jsonData[\"username\"]);",
+									"pm.environment.set(\"password\", jsonData[\"password\"]);",
+									"pm.environment.set(\"email\", jsonData[\"email\"]);",
+									"pm.environment.set(\"user\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{new_username}}\",\n    \"password\": \"{{new_password}}\",\n    \"email\": \"{{new_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "User 2",
+			"item": [
+				{
+					"name": "Create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "bdb1dd09-f28a-47ff-b794-891e7e48f8f8",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"username\", jsonData[\"username\"]);",
+									"pm.environment.set(\"password\", jsonData[\"password\"]);",
+									"pm.environment.set(\"email\", jsonData[\"email\"]);",
+									"pm.environment.set(\"user\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "",
+								"value": "{{$randomEmail}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{$randomWord}}\",\n  \"password\": \"{{$randomPassword}}\",\n  \"email\": \"{{$randomEmail}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/user/registrate",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"registrate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Auth user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "de17f48c-eca5-4113-8bf3-cbbc08222446",
+								"exec": [
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"token_data\", JSON.stringify(jsonData));",
+									"pm.environment.set(\"token\", jsonData[\"token\"]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/auth",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"auth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fba37b2f-63cb-41b2-b8f3-40c43e30ecb2",
+								"exec": [
+									"pm.test(\"Test username\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.username).to.eql(",
+									"        pm.variables.get(\"username\")",
+									"    );",
+									"});",
+									"",
+									"pm.test(\"Test password\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.eql(",
+									"        pm.variables.get(\"password\")",
+									"    );",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change profile",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "4d9613af-5017-4d82-a807-9ae00c85670c",
+								"exec": [
+									"pm.environment.set(",
+									"    \"new_username\", ",
+									"    pm.variables.replaceIn('{{$randomWord}}')",
+									");",
+									"pm.environment.set(",
+									"    \"new_password\", ",
+									"    pm.variables.replaceIn('{{$randomPassword}}')",
+									");",
+									"pm.environment.set(",
+									"    \"new_email\", ",
+									"    pm.variables.replaceIn('{{$randomEmail}}')",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "d9bdc6e0-665d-46f1-9be4-3456a87eeeae",
+								"exec": [
+									"pm.test(\"Test username\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.username).to.eql(",
+									"        pm.variables.get(\"new_username\")",
+									"    );",
+									"});",
+									"",
+									"pm.test(\"Test password\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.password).to.eql(",
+									"        pm.variables.get(\"new_password\")",
+									"    );",
+									"});",
+									"",
+									"let jsonData = pm.response.json();",
+									"pm.environment.set(\"username\", jsonData[\"username\"]);",
+									"pm.environment.set(\"password\", jsonData[\"password\"]);",
+									"pm.environment.set(\"email\", jsonData[\"email\"]);",
+									"pm.environment.set(\"user\", JSON.stringify(jsonData));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"{{new_username}}\",\n    \"password\": \"{{new_password}}\",\n    \"email\": \"{{new_email}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "sources",
+			"item": [
+				{
+					"name": "Habr",
+					"item": [
+						{
+							"name": "Create source",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "ba063d1b-77b1-4c28-a969-c345771c4a95",
+										"exec": [
+											"let jsonData = pm.response.json();",
+											"pm.environment.set(\"habr_data\", JSON.stringify(jsonData));",
+											"pm.environment.set(\"habr_id\", jsonData[\"id\"]);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"Habe\",\n    \"description\": \"IT news\",\n    \"link\": \"https://habr.com/ru/rss/all/all/\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/sources",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sources"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "HackerNews",
+					"item": [
+						{
+							"name": "Create source",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "ba063d1b-77b1-4c28-a969-c345771c4a95",
+										"exec": [
+											"let jsonData = pm.response.json();",
+											"pm.environment.set(\"habr_data\", JSON.stringify(jsonData));",
+											"pm.environment.set(\"habr_id\", jsonData[\"id\"]);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\": \"HackerNews\",\n    \"description\": \"Tech news\",\n    \"link\": \"https://hnrss.org/newest\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/sources",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sources"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"protocolProfileBehavior": {},
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Get sources",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/sources",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"sources"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e11fb0dd-f26a-4059-bf30-c48693052e5d",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "31ac98e4-83b9-4ce5-aff1-a45773284798",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
