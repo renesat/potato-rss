@@ -15,6 +15,7 @@ const createDB = (db) => {
         createTable('tags', (table) => {
             table.increments('id').primary();
             table.string('title', 255).notNullable().unique();
+            table.primary(['title', 'id']);
         }).then(() => {
             console.log('Created Table: tags');
         });
@@ -40,6 +41,7 @@ const createDB = (db) => {
                 references('news.id');
             table.integer('tag_id').notNullable().
                 references('tags.id');
+            table.primary(['news_id', 'tag_id']);
         }).then(() => {
             console.log('Created Table: news_tags');
         });
