@@ -81,9 +81,8 @@ const createDB = (db) => {
         });
     db.knex.schema.
         createTable('roles', (table) => {
-            table.increments('id');
+            table.increments('id').primary();
             table.string('name', 255).notNullable().unique();
-            table.primary(['id', 'name']);
         }).then(() => {
             console.log('Created Table: roles');
         });
@@ -91,13 +90,13 @@ const createDB = (db) => {
 
 const dropDB = (db) => {
     db.knex.schema.
-        dropTable('tags').
-        dropTable('news').
-        dropTable('sources').
-        dropTable('users').
-        dropTable('auth').
-        dropTable('news_tags').
-        dropTable('roles').
+        dropTableIfExists('tags').
+        dropTableIfExists('news').
+        dropTableIfExists('sources').
+        dropTableIfExists('users').
+        dropTableIfExists('auth').
+        dropTableIfExists('news_tags').
+        dropTableIfExists('roles').
         then(() => {
             console.log('drop DB');
         });
