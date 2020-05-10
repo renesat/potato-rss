@@ -3,10 +3,10 @@ const db = require('../../common/db');
 const getNewsList = (user) => {
     return db.News.getUserNewsList(
         user.id
-    ).catch(err => {
+    ).then(newsList => {
         return {
-            error: 'server_error',
-            message: err.message
+            status: 200,
+            data: newsList
         };
     });
 };
@@ -14,17 +14,23 @@ const getNewsList = (user) => {
 const getNews = (news_id) => {
     return db.News.getNews(
         news_id
-    ).catch(err => {
+    ).then(news => {
+        return {
+            status: 200,
+            data: news
+        };
+    }).catch(err => {
         if (err.message === 'EmptyResponse') {
             return {
-                error: 'not_found',
-                message: `Not found news ${news_id}`
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    message: `Not found news ${news_id}`
+                }
             };
+        } else {
+            throw err;
         }
-        return {
-            error: 'server_error',
-            message: err.message
-        };
     });
 };
 
@@ -34,17 +40,23 @@ const changeNews = (news_id, data) => {
     };
     return db.News.updateNews(
         news_id, new_data
-    ).catch(err => {
+    ).then(news => {
+        return {
+            status: 200,
+            data: news
+        };
+    }).catch(err => {
         if (err.message === 'EmptyResponse') {
             return {
-                error: 'not_found',
-                message: `Not found news ${news_id}`
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    message: `Not found news ${news_id}`
+                }
             };
+        } else {
+            throw err;
         }
-        return {
-            error: 'server_error',
-            message: err.message
-        };
     });
 };
 

@@ -3,29 +3,57 @@ const service = require('./service');
 const passport = require('passport');
 const {notFoundPage} = require('../../common/pages');
 
-const getSources = async (req, res) => {
-    const sources = await service.getSourcesList(req.user);
-    res.status(200).json(sources);
+const getSources = async (req, res, next) => {
+    await service.getSourcesList(
+        req.user
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const addSource = async (req, res) => {
-    const source = await service.addSource(req.user, req.body);
-    res.status(200).json(source);
+const addSource = async (req, res, next) => {
+    await service.addSource(
+        req.user,
+        req.body
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const getSource = async (req, res) => {
-    const source = await service.getSource(req.user, req.params.idSource);
-    res.status(200).json(source);
+const getSource = async (req, res, next) => {
+    await service.getSource(
+        req.user,
+        req.params.idSource
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const changeSource = async (req, res) => {
-    const source = await service.changeSource(req.params.idSource, req.body);
-    res.status(200).json(source);
+const changeSource = async (req, res, next) => {
+    await service.changeSource(
+        req.params.idSource,
+        req.body
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const deleteSource = async (req, res) => {
-    await service.deleteSource(req.params.idSource); // TODO
-    res.status(200).send('');
+const deleteSource = async (req, res, next) => {
+    await service.deleteSource(
+        req.params.idSource
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
 const notExistError = async (req, res) => {

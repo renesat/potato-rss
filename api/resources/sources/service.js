@@ -3,10 +3,10 @@ const db = require('../../common/db');
 const getSourcesList = async (user) => {
     return db.Source.getUserSources(
         user.id
-    ).catch (err => {
+    ).then(sourceList => {
         return {
-            error: 'server_error',
-            message: err.message
+            status: 200,
+            data: sourceList
         };
     });
 };
@@ -15,29 +15,35 @@ const addSource = async (user, data) => {
     return db.Source.createSource(
         user.id,
         data
-    ).catch(err => {
+    ).then(source => {
         return {
-            error: 'server_error',
-            message: err.message
+            status: 200,
+            data: source
         };
     });
 };
 
 const getSource = async (user, id_source) => {
-    return db.Source.getInfo(
+    return await db.Source.getInfo(
         user.id,
         id_source
-    ).catch(err => {
+    ).then(source => {
+        return {
+            status: 200,
+            data: source
+        };
+    }).catch(err => {
         if (err.message === 'EmptyResponse') {
             return {
-                error: 'not_found',
-                message: `Not found source ${id_source}`
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    message: `Not found source ${id_source}`
+                }
             };
+        } else {
+            throw err;
         }
-        return {
-            error: 'server_error',
-            message: err.message
-        };
     });
 };
 
@@ -48,22 +54,35 @@ const changeSource = (user, id_source, data) => {
         user.id,
         id_source,
         data
-    ).catch(err => {
+    ).then(source => {
+        return {
+            status: 200,
+            data: source
+        };
+    }).catch(err => {
         if (err.message === 'EmptyResponse') {
             return {
-                error: 'not_found',
-                message: `Not found source ${id_source}`
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    message: `Not found source ${id_source}`
+                }
             };
+        } else {
+            throw err;
         }
-        return {
-            error: 'server_error',
-            message: err.message
-        };
     });
 };
 
 const deleteSource = (idSource) => {
-    return db.Source.deleteSource(idSource);
+    return db.Source.deleteSource(
+        idSource
+    ).then(source => {
+        return {
+            status: 200,
+            data: source
+        };
+    });
 };
 
 

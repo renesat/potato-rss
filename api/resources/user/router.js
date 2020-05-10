@@ -3,32 +3,55 @@ const service = require('./service');
 const passport = require('passport');
 const {notFoundPage} = require('../../common/pages');
 
-const createUser = async (req, res) => {
-    const user = await service.createUser(req.body);
-    res.status(200).json(user);
+const createUser = async (req, res, next) => {
+    await service.createUser(
+        req.body
+    ).then(result => {
+        res.status(result['status']).json(result['data']);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const createToken = async (req, res) => {
-    const token = await service.createToken(req.user);
-    res.status(200).json(token);
+const createToken = async (req, res, next) => {
+    await service.createToken(
+        req.user
+    ).then(result => {
+        res.status(result['status']).json(result['data']);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const changeProfile = async (req, res) => {
-    const user = await service.changeProfile(
+const changeProfile = async (req, res, next) => {
+    await service.changeProfile(
         req.user,
         req.body
-    );
-    res.status(200).json(user);
+    ).then(result => {
+        res.status(result['status']).json(result['data']);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const getInfo = async (req, res) => {
-    const info = await service.getUserInfo(req.user);
-    res.status(200).json(info);
+const getInfo = async (req, res, next) => {
+    await service.getUserInfo(
+        req.user
+    ).then(result => {
+        res.status(result['status']).json(result['data']);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const deleteUser = async (req, res) => {
-    const user = await service.deleteUser(req.user);
-    res.status(200).send(user);
+const deleteUser = async (req, res, next) => {
+    await service.deleteUser(
+        req.user
+    ).then(result => {
+        res.status(result['status']).json(result['data']);
+    }).catch(err => {
+        next(err);
+    });
 };
 
 const notExistError = async (req, res) => {

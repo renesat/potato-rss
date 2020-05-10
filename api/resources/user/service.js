@@ -2,44 +2,43 @@ const db = require('../../common/db');
 
 const createUser = async (data) => {
     data['role_id'] = await db.Role.getRoleID('user');
-    return db.User.createUser(
-        data
-    ).catch(err => {
-        return {
-            error: 'server_error',
-            message: err.message
-        };
-    });
+    let user = await db.User.createUser(data);
+    return {
+        status: 200,
+        data: user
+    };
 };
 
 const createToken = async (user) => {
-    return user.refreshToken(
-    ).catch(err => {
-        return {
-            error: 'server_error',
-            message: err.message
-        };
-    });
+    let token = await user.refreshToken();
+    return {
+        status: 200,
+        data: token
+    };
 };
 
 const changeProfile = async (user, data) => {
-    // TODO: Add validation
-    return user.update(
+    let changed_user = await user.update(
         data
-    ).catch(err => {
-        return {
-            error: 'server_error',
-            message: err.message
-        };
-    });
+    );
+    return {
+        status: 200,
+        data: changed_user
+    };
 };
 
-const getUserInfo = (user) => {
-    return user.toJSON();
+const getUserInfo = async (user) => {
+    return {
+        status: 200,
+        data: await user.toJSON()
+    };
 };
 
-const deleteUser = (user) => {
-    return user.delete();
+const deleteUser = async (user) => {
+    return {
+        status: 200,
+        data: await user.delete()
+    };
 };
 
 module.exports = {

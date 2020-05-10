@@ -12,6 +12,7 @@ global.appConfig = {...config['default'], ...config[env]};
 const {notFoundPage} = require('./common/pages');
 const express = require('express');
 const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
 
 /*
  * Api app
@@ -19,6 +20,7 @@ const bodyParser = require('body-parser');
 const api = express();
 api.use(bodyParser.urlencoded({extended: false}));
 api.use(bodyParser.json());
+api.use(methodOverride());
 
 // Add pasport
 const passportConfigurator = require('./passport');
@@ -32,6 +34,11 @@ swaggerUIConfigurator(api);
 // Add routes
 const resourceRouter = require('./resources');
 api.use('/', resourceRouter);
+
+// errors
+const {logErrors, defaultErrorHandler} = require('./common/errors');
+api.use(logErrors);
+api.use(defaultErrorHandler);
 
 /*
  * Start application

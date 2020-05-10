@@ -1,19 +1,35 @@
 const {Router}= require('express');
 const service = require('./service');
 
-const getNewsList = async (req, res) => {
-    const news = await service.getNewsList(req.user);
-    res.status(200).json(news);
+const getNewsList = async (req, res, next) => {
+    await service.getNewsList(
+        req.user
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const getNews = async (req, res) => {
-    const news = await service.getNews(res.params.news_id);
-    res.status(200).json(news);
+const getNews = async (req, res, next) => {
+    await service.getNews(
+        res.params.news_id
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
-const changeNews = async (req, res) => {
-    const news = await service.changeNews(res.params.idNews); // TODO
-    res.status(200).json(news);
+const changeNews = async (req, res, next) => {
+    // TODO
+    await service.changeNews(
+        res.params.idNews
+    ).then(result => {
+        res.status(result.status).json(result.data);
+    }).catch(err => {
+        next(err);
+    });
 };
 
 // const deleteNews = async (req, res) => {
