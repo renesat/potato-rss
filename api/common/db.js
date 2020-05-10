@@ -81,8 +81,9 @@ const createDB = (db) => {
         });
     db.knex.schema.
         createTable('roles', (table) => {
-            table.increments('id').primary();
+            table.increments('id');
             table.string('name', 255).notNullable().unique();
+            table.primary(['id', 'name']);
         }).then(() => {
             console.log('Created Table: roles');
         });
