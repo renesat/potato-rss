@@ -1,9 +1,10 @@
 const {Router}= require('express');
 const service = require('./service');
+const passport = require('passport');
 
 const getNewsList = async (req, res, next) => {
     await service.getNewsList(
-        req.user
+        req.params.sourceID
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {
@@ -13,7 +14,7 @@ const getNewsList = async (req, res, next) => {
 
 const getNews = async (req, res, next) => {
     await service.getNews(
-        res.params.news_id
+        req.params.newsID
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {
@@ -21,10 +22,9 @@ const getNews = async (req, res, next) => {
     });
 };
 
-const changeNews = async (req, res, next) => {
-    // TODO
-    await service.changeNews(
-        res.params.idNews
+const swapFavourite = async (req, res, next) => {
+    await service.swapFavourite(
+        req.params.newsID
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {
@@ -42,12 +42,31 @@ const notExistError = async (req, res) => {
 };
 
 const router = new Router();
-router.get('/news', getNewsList);
-router.all('/news', notExistError);
+router.get(
+    '/sources/:sourceID/news',
+    passport.authenticate('bearer', { session: false }),
+    getNewsList
+);
+router.all(
+    '/sources/:sourceID/news',
+    passport.authenticate('bearer', { session: false }),
+    notExistError
+);
 
-router.get('/news/:idNews', getNews);
-router.patch('/news/:idNews', changeNews);
+router.get(
+    '/news/:newsID',
+    passport.authenticate('bearer', { session: false }),
+    getNews
+);
 // router.delete('/news/:idNews', deleteNews);
-router.all('/news/:idNews', notExistError);
+router.all('/news/:newsID', notExistError);
+
+
+router.patch(
+    '/news/:newsID/swapfavourite',
+    passport.authenticate('bearer', { session: false }),
+    swapFavourite
+);
+router.all('/news/:newsID/swapfavourite', notExistError);
 
 module.exports = router;

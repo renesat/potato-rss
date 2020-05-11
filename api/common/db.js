@@ -184,11 +184,12 @@ const News = db.model(
             return News.where({
                 id: news_id,
             }).fetch().then(news => {
+                console.log(news.attributes.favourite)
                 return news.save(
-                    {favourite: !news.favourite},
-                    {patch: true, withRelated: ['tags']}
+                    {favourite: !news.attributes.favourite},
+                    {patch: true}
                 ).then(news => {
-                    return news;
+                    return news.fetch({withRelated: ['tags']});
                 });
             });
         }
@@ -230,6 +231,9 @@ const User = db.model(
             return this.save(data, {patch: true}).then(user => {
                 return user;
             });
+        },
+        updateNews() {
+            // TODO
         }
     },
     {
@@ -253,15 +257,19 @@ const Source = db.model(
         }
     },
     {
-        updateNews(user_id = undefined, source_id =  undefined) {
-            return Source.where({
-                // user_id: user_id,
-                // id: source_id
-            }).fetchAll().then(sources => {
+        updateNews(source_id = undefined) {
+            let whereData = source_id === undefined ? {} : {id: source_id};
+            return Source.where(
+                whereData
+            ).fetchAll().then(sources => {
                 sources.forEach(async source => {
                     let items = await rss.getNews(
                         source.attributes.link
-                    );
+                    ).catch(err => {
+                        intel.error(
+                            `Not update source (id: ${source.id}): ${err.message}`
+                        );
+                    });
                     if (!items) {
                         return;
                     }

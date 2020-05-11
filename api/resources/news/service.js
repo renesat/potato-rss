@@ -1,8 +1,8 @@
 const db = require('../../common/db');
 
-const getNewsList = (user) => {
-    return db.News.getUserNewsList(
-        user.id
+const getNewsList = (source_id) => {
+    return db.News.getNewsList(
+        source_id
     ).then(newsList => {
         return {
             status: 200,
@@ -34,12 +34,9 @@ const getNews = (news_id) => {
     });
 };
 
-const changeNews = (news_id, data) => {
-    const new_data = {
-        favourite: data['facourite']
-    };
-    return db.News.updateNews(
-        news_id, new_data
+const swapFavourite = (news_id) => {
+    return db.News.swapFavourite(
+        news_id
     ).then(news => {
         return {
             status: 200,
@@ -62,4 +59,4 @@ const changeNews = (news_id, data) => {
 
 module.exports.getNewsList = getNewsList;
 module.exports.getNews = getNews;
-module.exports.changeNews = changeNews;
+module.exports.swapFavourite =  swapFavourite;

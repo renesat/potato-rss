@@ -27,7 +27,7 @@ const addSource = async (req, res, next) => {
 const getSource = async (req, res, next) => {
     await service.getSource(
         req.user,
-        req.params.idSource
+        req.params.sourceID
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {
@@ -37,7 +37,7 @@ const getSource = async (req, res, next) => {
 
 const changeSource = async (req, res, next) => {
     await service.changeSource(
-        req.params.idSource,
+        req.params.sourceID,
         req.body
     ).then(result => {
         res.status(result.status).json(result.data);
@@ -48,7 +48,7 @@ const changeSource = async (req, res, next) => {
 
 const deleteSource = async (req, res, next) => {
     await service.deleteSource(
-        req.params.idSource
+        req.params.sourceID
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {
@@ -88,22 +88,22 @@ router.all(
 
 
 router.get(
-    '/sources/:idSource',
+    '/sources/:sourceID',
     passport.authenticate('bearer', { session: false }),
     getSource
 );
 router.put(
-    '/sources/:idSource',
+    '/sources/:sourceID',
     passport.authenticate('bearer', { session: false }),
     changeSource
 );
 router.delete(
-    '/sources/:idSource',
+    '/sources/:sourceID',
     passport.authenticate('bearer', { session: false }),
     deleteSource
 );
 router.all(
-    '/sources/:idSource',
+    '/sources/:sourceID',
     notExistError
 );
 

@@ -1,7 +1,7 @@
 const intel = require('intel');
 
 function logErrors(err, req, res, next) {
-    intel.error(err.stack);
+    intel.error(err.message);
     next(err);
 }
 

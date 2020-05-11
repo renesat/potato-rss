@@ -16,6 +16,7 @@ const addSource = async (user, data) => {
         user.id,
         data
     ).then(source => {
+        db.Source.updateNews(source.id);
         return {
             status: 200,
             data: source
