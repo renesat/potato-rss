@@ -13,6 +13,7 @@ const {notFoundPage} = require('./common/pages');
 const express = require('express');
 const bodyParser = require('body-parser');
 const methodOverride = require('method-override');
+const intel = require('intel');
 
 /*
  * Api app
@@ -55,8 +56,11 @@ app.all('*', notExistError);
 const db = require('./common/db');
 setInterval(
     async () => {
-        await console.log('Update all news...');
-        return await db.Source.updateNews();
+        await intel.info('Update all news...');
+        return await db.Source.updateNews(
+        ).catch(err => {
+            intel.error(`Errror when update news: ${err.message}`);
+        });
     },
     global.appConfig['news_update_time'] * 1000
 );

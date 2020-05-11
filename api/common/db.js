@@ -1,4 +1,5 @@
-const {getNews} = require('./rss');
+const rss = require('./rss');
+const intel = require('intel');
 
 const knex = require('knex')({
     client: 'sqlite3',
@@ -13,9 +14,8 @@ const db = require('bookshelf')(knex);
 const createDB = (db) => {
     db.knex.schema.
         createTable('tags', (table) => {
-            table.increments('id').primary();
+            table.increments('id').unique().primary();
             table.string('title', 255).notNullable().unique();
-            table.primary(['title', 'id']);
         }).then(() => {
             console.log('Created Table: tags');
         });
@@ -51,6 +51,8 @@ const createDB = (db) => {
             table.integer('user_id').notNullable().
                 references('users.id');
             table.string('title', 255).notNullable();
+            table.datetime('last_update');
+            table.text('last_update_status');
             table.string('description', 255);
             table.string('link', 255).notNullable();
         }).then(() => {
@@ -105,7 +107,7 @@ const dropDB = (db) => {
 const Tag = db.model('Tag', {
     tableName: 'tags',
     news() {
-        return this.belongsToMany('News');
+        return this.belongsToMany('News', 'news_tags', 'news_id', 'tags_id');
     }
 }, {
 });
@@ -113,77 +115,72 @@ const Tag = db.model('Tag', {
 const News = db.model('News', {
     tableName: 'news',
     tags() {
-        return this.belongsToMany('Tags');
+        return this.belongsToMany('Tag', 'news_tags', 'tag_id', 'news_id');
     },
     source() {
         return this.belongsTo('Source');
     }
 }, {
-    async updateNewsData(source_id, data) {
-        const news = News.where({
+    /**
+     * Change news data to new data if is changed
+     */
+    async refreshNews(source_id, data) {
+        const news = await new News({
             source_id: source_id,
             guid: data['guid']
-            // rss_data_hash: data['rss_data_hash']
-        }).fetch({require: false}).then(news => {
+        }).fetch({require: false, withRelated: ['tags']}).then(news => {
             return news;
         });
-        if (!await news) {
+        if ((news !== null) &&
+            news.attributes.rss_data_hash === data['rss_data_hash']) {
+            return news;
+        }
+        if (news !== null) {
             return new News({
-                source_id: source_id,
-                ...data
-            }).save().then(news => {
+                id: news.id
+            }).save(
+                data,
+                {patch: true, withRelated: ['tags']}
+            ).then(news => {
                 return news;
             });
         } else {
-            if ((await news).attributes.rss_data_hash === data['rss_data_hash']) {
-                return news;
-            } else {
-                return new News({
-                    id: (await news).attributes.id
-                }).save(data, {patch: true}).then(news => {
+            return new News(
+                {
+                    source_id: source_id,
+                    ...data
+                }
+            ).save().then(nnews => {
+                return News.where({
+                    id: nnews.id
+                }).fetch({withRelated: ['tags']}).then(news => {
                     return news;
                 });
-            }
+            });
         }
     },
     getNews(news_id) {
         return new News({
             id: news_id
-        }).fetch().then(news => {
+        }).fetch({withRelated: ['tags']}).then(news => {
             return news;
-        });
-    },
-    getUserNewsList(user_id) {
-        return Source.with({
-            user_id: user_id
-        }).fetchAll({require: false, withRelated: ['news']}).then(sources => {
-            let newsList = [];
-            for (let i in sources) {
-                let source = sources[i];
-                if (source.related('news')) {
-                    newsList.push.apply(
-                        newsList,
-                        source.related('news')
-                    );
-                }
-            }
-            return newsList;
         });
     },
     getNewsList(source_id) {
         return News.where({
             source_id: source_id
-        }).fetchAll().then(newsList => {
+        }).fetchAll({withRelated: ['tags']}).then(newsList => {
             return newsList;
         });
     },
-    updateNews(news_id, data) {
-        return new News({
+    swapFavourite(news_id) {
+        return News.where({
             id: news_id,
-        }).fetch().then(_user => { // eslint-disable-line no-unused-vars
-            return new News({
-                id: news_id,
-            }).save(data, {patch: true}).then(news => {
+        }).fetch().then(news => {
+            return news.save(
+                {favourite: !news.favourite},
+                {patch: true, withRelated: ['tags']}
+            ).then(news => {
                 return news;
             });
         });
@@ -247,14 +244,21 @@ const Source = db.model('Source', {
             // id: source_id
         }).fetchAll().then(sources => {
             sources.forEach(async source => {
-                let items = await getNews(source.attributes.link);
-                if (items) {
-                    for (let i in items) {
-                        await News.updateNewsData(
-                            source.id,
-                            items[i]
+                let items = await rss.getNews(
+                    source.attributes.link
+                );
+                if (!items) {
+                    return;
+                }
+                for (let i in items) {
+                    await News.refreshNews(
+                        source.id,
+                        items[i]
+                    ).catch(err => {
+                        intel.error(
+                            `Not update news ${items[i]['guid']} in source (id: ${source.id}): ${err.message}`
                         );
-                    }
+                    });
                 }
             });
         });
