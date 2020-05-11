@@ -104,263 +104,287 @@ const dropDB = (db) => {
         });
 };
 
-const Tag = db.model('Tag', {
-    tableName: 'tags',
-    news() {
-        return this.belongsToMany('News', 'news_tags', 'news_id', 'tags_id');
-    }
-}, {
-});
-
-const News = db.model('News', {
-    tableName: 'news',
-    tags() {
-        return this.belongsToMany('Tag', 'news_tags', 'tag_id', 'news_id');
-    },
-    source() {
-        return this.belongsTo('Source');
-    }
-}, {
-    /**
-     * Change news data to new data if is changed
-     */
-    async refreshNews(source_id, data) {
-        const news = await new News({
-            source_id: source_id,
-            guid: data['guid']
-        }).fetch({require: false, withRelated: ['tags']}).then(news => {
-            return news;
-        });
-        if ((news !== null) &&
-            news.attributes.rss_data_hash === data['rss_data_hash']) {
-            return news;
+const Tag = db.model(
+    'Tag',
+    {
+        tableName: 'tags',
+        news() {
+            return this.belongsToMany('News', 'news_tags', 'news_id', 'tags_id');
         }
-        if (news !== null) {
-            return new News({
-                id: news.id
-            }).save(
-                data,
-                {patch: true, withRelated: ['tags']}
-            ).then(news => {
+    },
+    {
+    }
+);
+
+const News = db.model(
+    'News',
+    {
+        tableName: 'news',
+        tags() {
+            return this.belongsToMany('Tag', 'news_tags', 'tag_id', 'news_id');
+        },
+        source() {
+            return this.belongsTo('Source');
+        }
+    },
+    {
+        /**
+         * Change news data to new data if is changed
+         */
+        async refreshNews(source_id, data) {
+            const news = await new News({
+                source_id: source_id,
+                guid: data['guid']
+            }).fetch({require: false, withRelated: ['tags']}).then(news => {
                 return news;
             });
-        } else {
-            return new News(
-                {
-                    source_id: source_id,
-                    ...data
-                }
-            ).save().then(nnews => {
-                return News.where({
-                    id: nnews.id
-                }).fetch({withRelated: ['tags']}).then(news => {
+            if ((news !== null) &&
+                news.attributes.rss_data_hash === data['rss_data_hash']) {
+                return news;
+            }
+            if (news !== null) {
+                return new News({
+                    id: news.id
+                }).save(
+                    data,
+                    {patch: true, withRelated: ['tags']}
+                ).then(news => {
+                    return news;
+                });
+            } else {
+                return new News(
+                    {
+                        source_id: source_id,
+                        ...data
+                    }
+                ).save().then(nnews => {
+                    return News.where({
+                        id: nnews.id
+                    }).fetch({withRelated: ['tags']}).then(news => {
+                        return news;
+                    });
+                });
+            }
+        },
+        getNews(news_id) {
+            return new News({
+                id: news_id
+            }).fetch({withRelated: ['tags']}).then(news => {
+                return news;
+            });
+        },
+        getNewsList(source_id) {
+            return News.where({
+                source_id: source_id
+            }).fetchAll({withRelated: ['tags']}).then(newsList => {
+                return newsList;
+            });
+        },
+        swapFavourite(news_id) {
+            return News.where({
+                id: news_id,
+            }).fetch().then(news => {
+                return news.save(
+                    {favourite: !news.favourite},
+                    {patch: true, withRelated: ['tags']}
+                ).then(news => {
                     return news;
                 });
             });
         }
-    },
-    getNews(news_id) {
-        return new News({
-            id: news_id
-        }).fetch({withRelated: ['tags']}).then(news => {
-            return news;
-        });
-    },
-    getNewsList(source_id) {
-        return News.where({
-            source_id: source_id
-        }).fetchAll({withRelated: ['tags']}).then(newsList => {
-            return newsList;
-        });
-    },
-    swapFavourite(news_id) {
-        return News.where({
-            id: news_id,
-        }).fetch().then(news => {
-            return news.save(
-                {favourite: !news.favourite},
-                {patch: true, withRelated: ['tags']}
-            ).then(news => {
-                return news;
+    }
+);
+
+const User = db.model(
+    'User',
+    {
+        tableName: 'users',
+        checkPassword(password) {
+            return this.password == password;
+        },
+        token() {
+            return this.hasOne('Auth');
+        },
+        sources() {
+            return this.hasMany('Source');
+        },
+        role() {
+            return this.belongsTo('Role');
+        },
+        delete() {
+            return new User({
+                id: this.id
+            }).fetch({withRelated: ['sources', 'token']}).then(user => {
+                user.related('sources').invokeThen('destroy');
+                user.related('token').destroy();
+                user.destroy();
+                return this;
             });
-        });
-    }
-});
-
-const User = db.model('User', {
-    tableName: 'users',
-    checkPassword(password) {
-        return this.password == password;
-    },
-    token() {
-        return this.hasOne('Auth');
-    },
-    sources() {
-        return this.hasMany('Source');
-    },
-    role() {
-        return this.belongsTo('Role');
-    },
-    delete() {
-        return new User({
-            id: this.id
-        }).fetch({withRelated: ['sources', 'token']}).then(user => {
-            user.related('sources').invokeThen('destroy');
-            user.related('token').destroy();
-            user.destroy();
-            return this;
-        });
-    },
-    refreshToken() {
-        return Auth.refreshUserToken(this.id);
-    },
-    update(data) {
-        delete data.role_id;
-        delete data.id;
-        return this.save(data, {patch: true}).then(user => {
-            return user;
-        });
-    }
-}, {
-    createUser(userData) {
-        return new User(userData).save().then(user => {
-            return user;
-        });
-    }
-});
-
-const Source = db.model('Source', {
-    tableName: 'sources',
-    news() {
-        return this.hasMany('News');
-    },
-    user() {
-        return this.belongsTo('User');
-    }
-}, {
-    updateNews(user_id = undefined, source_id =  undefined) {
-        return Source.where({
-            // user_id: user_id,
-            // id: source_id
-        }).fetchAll().then(sources => {
-            sources.forEach(async source => {
-                let items = await rss.getNews(
-                    source.attributes.link
-                );
-                if (!items) {
-                    return;
-                }
-                for (let i in items) {
-                    await News.refreshNews(
-                        source.id,
-                        items[i]
-                    ).catch(err => {
-                        intel.error(
-                            `Not update news ${items[i]['guid']} in source (id: ${source.id}): ${err.message}`
-                        );
-                    });
-                }
+        },
+        refreshToken() {
+            return Auth.refreshUserToken(this.id);
+        },
+        update(data) {
+            delete data.role_id;
+            delete data.id;
+            return this.save(data, {patch: true}).then(user => {
+                return user;
             });
-        });
+        }
     },
-    updateSource(user_id, id_source, data) {
-        return new Source({
-            id: id_source,
-            user_id: user_id
-        }).save(data, {patch: true}).then(source => {
-            return source;
-        });
-    },
-    getInfo(user_id, id_source) {
-        return new Source({
-            id: id_source,
-            user_id: user_id
-        }).fetch({require: true}).then(source => {
-            return source;
-        });
-    },
-    createSource(user_id, data) {
-        return new Source({
-            user_id: user_id,
-            ...data
-        }).save().then(source => {
-            return source;
-        });
-    },
-    getUserSources(user_id) {
-        return Source.where({
-            user_id: user_id
-        }).fetchAll().then(sources => {
-            return sources;
-        });
-    },
-    deleteSource(idSource) {
-        return new Source({
-            id: idSource
-        }).fetch({withRelated: ['news']}).then(source => {
-            source.related('news').invokeThen('destroy');
-            source.destroy();
-            return source;
-        });
+    {
+        createUser(userData) {
+            return new User(userData).save().then(user => {
+                return user;
+            });
+        }
     }
-});
+);
 
-const Role = db.model('Role', {
-    tableName: 'roles',
-    users() {
-        return this.hasMany('User');
+const Source = db.model(
+    'Source',
+    {
+        tableName: 'sources',
+        news() {
+            return this.hasMany('News');
+        },
+        user() {
+            return this.belongsTo('User');
+        }
+    },
+    {
+        updateNews(user_id = undefined, source_id =  undefined) {
+            return Source.where({
+                // user_id: user_id,
+                // id: source_id
+            }).fetchAll().then(sources => {
+                sources.forEach(async source => {
+                    let items = await rss.getNews(
+                        source.attributes.link
+                    );
+                    if (!items) {
+                        return;
+                    }
+                    for (let i in items) {
+                        await News.refreshNews(
+                            source.id,
+                            items[i]
+                        ).catch(err => {
+                            intel.error(
+                                `Not update news ${items[i]['guid']} in source (id: ${source.id}): ${err.message}`
+                            );
+                        });
+                    }
+                });
+            });
+        },
+        updateSource(user_id, id_source, data) {
+            return new Source({
+                id: id_source,
+                user_id: user_id
+            }).save(data, {patch: true}).then(source => {
+                return source;
+            });
+        },
+        getInfo(user_id, id_source) {
+            return new Source({
+                id: id_source,
+                user_id: user_id
+            }).fetch({require: true}).then(source => {
+                return source;
+            });
+        },
+        createSource(user_id, data) {
+            return new Source({
+                user_id: user_id,
+                ...data
+            }).save().then(source => {
+                return source;
+            });
+        },
+        getUserSources(user_id) {
+            return Source.where({
+                user_id: user_id
+            }).fetchAll().then(sources => {
+                return sources;
+            });
+        },
+        deleteSource(idSource) {
+            return new Source({
+                id: idSource
+            }).fetch({withRelated: ['news']}).then(source => {
+                source.related('news').invokeThen('destroy');
+                source.destroy();
+                return source;
+            });
+        }
     }
-}, {
-    getRoleID(name) {
-        return new Role({name: name}).fetch().then(role => {
-            return role.id;
-        });
-    }
-});
+);
 
-const Auth = db.model('Auth', {
-    tableName: 'auth',
-    user() {
-        return this.belongsTo('User');
+const Role = db.model(
+    'Role',
+    {
+        tableName: 'roles',
+        users() {
+            return this.hasMany('User');
+        }
     },
-    isLife() {
-        const diffTime = Math.round(
-            (Date.now()-this.get('creation_time'))/1000
-        );
-        return diffTime < this.get('life_time');
+    {
+        getRoleID(name) {
+            return new Role({name: name}).fetch().then(role => {
+                return role.id;
+            });
+        }
     }
-}, {
-    generateToken() {
-        const uuidv4 = require('uuid/v4');
-        return {
-            token: uuidv4(),
-            creation_time: Date.now(),
-            life_time: global.appConfig['secure']['token_life_time']
-        };
-    },
-    createToken(user_id, token) {
-        return new Auth({
-            user_id: user_id,
-            ...token
-        }).save().then(token => {
-            return token;
-        });
-    },
-    refreshUserToken(user_id) {
-        return new Auth({
-            user_id: user_id
-        }).fetch({require: false}).then(token => {
-            if (token) {
-                token.destroy();
-            }
-            const new_token = Auth.generateToken();
-            return Auth.createToken(
-                user_id,
-                new_token
+);
+
+const Auth = db.model(
+    'Auth',
+    {
+        tableName: 'auth',
+        user() {
+            return this.belongsTo('User');
+        },
+        isLife() {
+            const diffTime = Math.round(
+                (Date.now()-this.get('creation_time'))/1000
             );
-        });
+            return diffTime < this.get('life_time');
+        }
+    },
+    {
+        generateToken() {
+            const uuidv4 = require('uuid/v4');
+            return {
+                token: uuidv4(),
+                creation_time: Date.now(),
+                life_time: global.appConfig['secure']['token_life_time']
+            };
+        },
+        createToken(user_id, token) {
+            return new Auth({
+                user_id: user_id,
+                ...token
+            }).save().then(token => {
+                return token;
+            });
+        },
+        refreshUserToken(user_id) {
+            return new Auth({
+                user_id: user_id
+            }).fetch({require: false}).then(token => {
+                if (token) {
+                    token.destroy();
+                }
+                const new_token = Auth.generateToken();
+                return Auth.createToken(
+                    user_id,
+                    new_token
+                );
+            });
+        }
     }
-});
+);
 
 
 module.exports = {
