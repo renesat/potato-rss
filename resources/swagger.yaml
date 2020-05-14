@@ -3,15 +3,17 @@ info:
   title: PotatoRSS
   description: 'Web RSS reader'
   version: 0.1.0
-#servers:
-#- url: http://localhost:8080/api/v1
+servers:
+ - url: http://localhost:8080/api/v1
 tags:
-- name: authorization
-  description: Авторизация
-- name: user
-  description: Работа с пользователями
-- name: source
-  description: Работа с ресурсами
+  - name: authorization
+    description: Авторизация
+  - name: user
+    description: Работа с пользователями
+  - name: source
+    description: Работа с ресурсами
+  - name: tags
+    description: Работа с тегами
 paths:
   /user:
     get:
@@ -94,6 +96,7 @@ paths:
 
       security:
         - basicAuth: []
+
   /sources:
     get:
       tags:
@@ -130,138 +133,6 @@ paths:
                 $ref: '#/components/schemas/Source'
       security:
         - bearerAuth: []
-#  /news/tags:
-#    get:
-#      tags:
-#        - tags
-#      summary: Список тегов пользователя
-#      responses:
-#        200:
-#          description: Успешно
-#          content:
-#            application/json:
-#              schema:
-#                type: array
-#                items:
-#                  $ref: '#/components/schemas/Tag'
-#      security:
-#          - bearerAuth: []
-  /news/{newsID}/swapfavourite:
-    put:
-      tags:
-        - news
-      summary: Изменить значение избраного
-      parameters:
-        - in: path
-          name: newsID
-          schema:
-            type: integer
-          required: true
-          description: ID новости
-      responses:
-        200:
-          description: Успешно
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/News'
-      security:
-        - bearerAuth: []
-  /news/{newsID}:
-    get:
-      tags:
-        - news
-      summary: Получить новость
-      parameters:
-        - in: path
-          name: newsID
-          schema:
-            type: integer
-          required: true
-          description: ID новости
-      responses:
-        200:
-          description: Успешно
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/News'
-      security:
-        - bearerAuth: []
-  /news/{newsID}/tags:
-    get:
-      tags:
-        - tags
-      summary: Получить теги новости
-      parameters:
-        - in: path
-          name: newsID
-          schema:
-            type: integer
-          required: true
-          description: ID новости
-      responses:
-        200:
-          description: Успешно
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Tag'
-      security:
-          - bearerAuth: []
-    put:
-      tags:
-        - tags
-      summary: Добавить тег
-      parameters:
-        - in: path
-          name: newsID
-          schema:
-            type: integer
-          required: true
-          description: ID новости
-      requestBody:
-        description: Имя тега
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChangeTag'
-      responses:
-        200:
-          description: Успешно
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Tag'
-      security:
-          - bearerAuth: []
-    delete:
-      tags:
-        - tags
-      summary: Удалить тег у новости
-      parameters:
-        - in: path
-          name: newsID
-          schema:
-            type: integer
-          required: true
-          description: ID новости
-      responses:
-        200:
-          description: Успешно
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Tag'
-      security:
-          - bearerAuth: []
   /sources/{sourceID}:
     get:
       tags:
@@ -330,29 +201,171 @@ paths:
                 $ref: '#/components/schemas/Source'
       security:
         - bearerAuth: []
-  /sources/{sourceID}/news:
+  /news:
     get:
       tags:
         - news
       summary: Список новостей
       parameters:
-        - in: path
+        - in: query
           name: sourceID
           schema:
             type: integer
-          required: true
-          description: Id ресурса
+          required: false
+          description: ID ресурса
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          required: false
+          description: Страница
       responses:
         200:
           description: Успешно
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/News'
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/News'
+                  isLastPage:
+                    type: boolean
+                  page:
+                    type: integer
+                  pageCount:
+                    type: integer
       security:
           - bearerAuth: []
+  /news/{newsID}:
+    get:
+      tags:
+        - news
+      summary: Получить новость
+      parameters:
+        - in: path
+          name: newsID
+          schema:
+            type: integer
+          required: true
+          description: ID новости
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+      security:
+        - bearerAuth: []
+  /news/{newsID}/swapfavourite:
+    put:
+      tags:
+        - news
+      summary: Изменить значение избраного
+      parameters:
+        - in: path
+          name: newsID
+          schema:
+            type: integer
+          required: true
+          description: ID новости
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+      security:
+        - bearerAuth: []
+  /news/{newsID}/addTag/{tagName}:
+    put:
+      tags:
+        - tags
+        - news
+      summary: Добавить тег
+      parameters:
+        - in: path
+          name: newsID
+          schema:
+            type: integer
+          required: true
+          description: ID новости
+        - in: path
+          name: tagName
+          schema:
+            type: string
+          required: true
+          description: Имя тега
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+      security:
+          - bearerAuth: []
+  /news/{newsID}/removeTag/{tagName}:
+    delete:
+      tags:
+        - tags
+        - news
+      summary: Удалить тег
+      parameters:
+        - in: path
+          name: newsID
+          schema:
+            type: integer
+          required: true
+          description: ID новости
+        - in: path
+          name: tagName
+          schema:
+            type: string
+          required: true
+          description: Имя тега
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+      security:
+          - bearerAuth: []
+
+  /tags:
+    get:
+      tags:
+        - tags
+      summary: Получить теги
+      parameters:
+        - in: query
+          name: sourceID
+          schema:
+            type: integer
+          required: false
+          description: ID ресурса
+        - in: query
+          name: newsID
+          schema:
+            type: integer
+          required: false
+          description: ID новости
+      responses:
+        200:
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+      security:
+        - bearerAuth: []
 components:
   schemas:
     User:
