@@ -104,6 +104,16 @@ const dropDB = (db) => {
         });
 };
 
+
+const NewsTags = db.model(
+    'NewsTags',
+    {
+        tableName: 'news_tags',
+    },
+    {
+    }
+);
+
 const Tag = db.model(
     'Tag',
     {
@@ -173,10 +183,17 @@ const News = db.model(
                 return news;
             });
         },
-        getNewsList(source_id) {
-            return News.where({
-                source_id: source_id
-            }).fetchAll({withRelated: ['tags']}).then(newsList => {
+        async getNewsList(sourceID = undefined) {
+            let whereParams = {};
+            if (sourceID !== undefined) {
+                whereParams['source_id'] = sourceID;
+                await new Source({id: sourceID}).fetch().then(source => {
+                    return source;
+                });
+            }
+            return News.where(
+                whereParams
+            ).fetchAll({withRelated: ['tags']}).then(newsList => {
                 return newsList;
             });
         },

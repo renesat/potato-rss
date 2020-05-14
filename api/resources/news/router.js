@@ -4,7 +4,7 @@ const passport = require('passport');
 
 const getNewsList = async (req, res, next) => {
     await service.getNewsList(
-        req.params.sourceID
+        req.query.sourceID
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {
@@ -43,12 +43,12 @@ const notExistError = async (req, res) => {
 
 const router = new Router();
 router.get(
-    '/sources/:sourceID/news',
+    '/news',
     passport.authenticate('bearer', { session: false }),
     getNewsList
 );
 router.all(
-    '/sources/:sourceID/news',
+    '/news',
     passport.authenticate('bearer', { session: false }),
     notExistError
 );
@@ -60,7 +60,6 @@ router.get(
 );
 // router.delete('/news/:idNews', deleteNews);
 router.all('/news/:newsID', notExistError);
-
 
 router.patch(
     '/news/:newsID/swapfavourite',

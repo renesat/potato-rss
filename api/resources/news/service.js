@@ -1,13 +1,25 @@
 const db = require('../../common/db');
 
-const getNewsList = (source_id) => {
+const getNewsList = (sourceID) => {
     return db.News.getNewsList(
-        source_id
+        sourceID
     ).then(newsList => {
         return {
             status: 200,
             data: newsList
         };
+    }).catch(err => {
+        if (err.message === 'EmptyResponse') {
+            return {
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    message: `Not found source ${sourceID}`
+                }
+            };
+        } else {
+            throw err;
+        }
     });
 };
 
@@ -25,7 +37,7 @@ const getNews = (news_id) => {
                 status: 400,
                 data: {
                     error: 'not_found',
-                    message: `Not found news ${news_id}`
+                    message: `Not found news ${newsID}`
                 }
             };
         } else {
@@ -34,7 +46,7 @@ const getNews = (news_id) => {
     });
 };
 
-const swapFavourite = (news_id) => {
+const swapFavourite = (newsID) => {
     return db.News.swapFavourite(
         news_id
     ).then(news => {
