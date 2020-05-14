@@ -1,9 +1,18 @@
 const db = require('../../common/db');
 
-const getNewsList = (sourceID) => {
+const getNewsList = (sourceID, page) => {
     return db.News.getNewsList(
-        sourceID
+        sourceID, page
     ).then(newsList => {
+        if (page > newsList.pageCount) {
+            return {
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    massage: `Page ${page} not exist`
+                }
+            };
+        }
         return {
             status: 200,
             data: newsList
@@ -23,9 +32,9 @@ const getNewsList = (sourceID) => {
     });
 };
 
-const getNews = (news_id) => {
+const getNews = (newsID) => {
     return db.News.getNews(
-        news_id
+        newsID
     ).then(news => {
         return {
             status: 200,
@@ -69,6 +78,30 @@ const swapFavourite = (newsID) => {
     });
 };
 
+const addTag = (newsID, tagName) => {
+    return db.News.addTag(
+        newsID, tagName
+    ).then(news => {
+        return {
+            status: 200,
+            data: news
+        };
+    }).catch(err => {
+        if (err.message === 'EmptyResponse') {
+            return {
+                status: 400,
+                data: {
+                    error: 'not_found',
+                    message: `Not found news ${newsID}`
+                }
+            };
+        } else {
+            throw err;
+        }
+    });
+};
+
 module.exports.getNewsList = getNewsList;
 module.exports.getNews = getNews;
 module.exports.swapFavourite =  swapFavourite;
+module.exports.addTag = addTag;

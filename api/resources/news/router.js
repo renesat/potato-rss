@@ -4,7 +4,8 @@ const passport = require('passport');
 
 const getNewsList = async (req, res, next) => {
     await service.getNewsList(
-        req.query.sourceID
+        req.query.sourceID,
+        req.query.page
     ).then(result => {
         res.status(result.status).json(result.data);
     }).catch(err => {

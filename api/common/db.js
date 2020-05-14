@@ -183,18 +183,30 @@ const News = db.model(
                 return news;
             });
         },
-        async getNewsList(sourceID = undefined) {
+        async getNewsList(sourceID = undefined, page = undefined) {
             let whereParams = {};
-            if (sourceID !== undefined) {
+            if (sourceID) {
                 whereParams['source_id'] = sourceID;
                 await new Source({id: sourceID}).fetch().then(source => {
                     return source;
                 });
             }
+
+            let fetchParams = {withRelated: ['tags']};
+            if (page) {
+                fetchParams['page'] = page;
+            }
             return News.where(
                 whereParams
-            ).fetchAll({withRelated: ['tags']}).then(newsList => {
-                return newsList;
+            ).orderBy('date', 'ASC').fetchPage(
+                fetchParams
+            ).then(newsList => {
+                return {
+                    items: newsList,
+                    isLastPage: newsList.pagination['page'] == newsList.pagination['pageCount'],
+                    page: newsList.pagination['page'],
+                    pageCount: newsList.pagination['pageCount']
+                };
             });
         },
         swapFavourite(news_id) {
