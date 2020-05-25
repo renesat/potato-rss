@@ -52,15 +52,16 @@ const resourceRouter = require('./resources');
 api.use('/', resourceRouter);
 
 // errors
-const {logErrors, defaultErrorHandler} = require('./common/errors');
-api.use(logErrors);
-api.use(defaultErrorHandler);
+const {requestErrorHandler, logErrorHandler, defaultErrorHandler} = require('./common/errors');
 
 /*
  * Start application
  */
 const app = express();
 app.use('/api/v1', api);
+app.use(requestErrorHandler);
+app.use(defaultErrorHandler);
+app.use(logErrorHandler);
 
 const notExistError = async (req, res) => {
     res.status(405).send(notFoundPage(req.url));
