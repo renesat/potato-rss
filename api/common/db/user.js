@@ -61,7 +61,6 @@ const User = db.model(
             }
         },
         async destroyUserData() {
-            await console.log('lol');
             await this.related('sources').fetch().then(sources =>{
                 sources.invokeMap('destroy');
             });
