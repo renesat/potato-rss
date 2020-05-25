@@ -53,16 +53,16 @@ const router = new Router();
 router.get(
     '/sources',
     passport.authenticate('bearer', { session: false }),
-    getSources
+    errorWrapper(getSources)
 );
 router.post(
     '/sources',
     passport.authenticate('bearer', { session: false }),
-    addSource
+    errorWrapper(addSource)
 );
 router.all(
     '/sources',
-    notExistError
+    errorWrapper(notExistError)
 );
 
 // router.get(
