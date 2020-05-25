@@ -2,56 +2,42 @@ const {Router}= require('express');
 const service = require('./service');
 const passport = require('passport');
 const {notFoundPage} = require('../../common/pages');
+const {errorWrapper} = require('../../common/errors');
 
-const createUser = async (req, res, next) => {
-    await service.createUser(
+const createUser = async (req, res) => {
+    let user = await service.createUser(
         req.body
-    ).then(result => {
-        res.status(result['status']).json(result['data']);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(user);
 };
 
 const createToken = async (req, res, next) => {
-    await service.createToken(
+    let token = await service.createToken(
         req.user
-    ).then(result => {
-        res.status(result['status']).json(result['data']);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(token);
 };
 
 const changeProfile = async (req, res, next) => {
-    await service.changeProfile(
+    let user = await service.changeProfile(
         req.user,
         req.body
-    ).then(result => {
-        res.status(result['status']).json(result['data']);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(user);
 };
 
 const getInfo = async (req, res, next) => {
-    await service.getUserInfo(
+    let user = await service.getUserInfo(
         req.user
-    ).then(result => {
-        res.status(result['status']).json(result['data']);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(user);
 };
 
 const deleteUser = async (req, res, next) => {
-    await service.deleteUser(
+    let user = await service.deleteUser(
         req.user
-    ).then(result => {
-        res.status(result['status']).json(result['data']);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(user);
 };
 
 const notExistError = async (req, res) => {
@@ -63,30 +49,30 @@ const router = new Router();
 router.get(
     '/user',
     passport.authenticate('bearer', { session: false }),
-    getInfo
+    errorWrapper(getInfo)
 );
 router.put(
     '/user',
     passport.authenticate('bearer', { session: false }),
-    changeProfile
+    errorWrapper(changeProfile)
 );
 router.delete(
     '/user',
     passport.authenticate('bearer', { session: false }),
-    deleteUser
+    errorWrapper(deleteUser)
 );
 router.all('/user', notExistError);
 
 router.post(
     '/user/registrate',
-    createUser
+    errorWrapper(createUser)
 );
 router.all('/user/registrate', notExistError);
 
 router.post(
     '/user/auth',
     passport.authenticate('basic', {session: false}),
-    createToken
+    errorWrapper(createToken)
 );
 router.all('/user/auth', notExistError);
 

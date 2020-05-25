@@ -1,44 +1,45 @@
 const db = require('../../common/db');
 
+const prepareUser = async (user) => {
+    return user.toJSON();
+};
+
+const prepareToken = async (token) => {
+    return token.toJSON();
+};
+
 const createUser = async (data) => {
-    data['role_id'] = await db.Role.getRoleID('user');
-    let user = await db.User.createUser(data);
-    return {
-        status: 200,
-        data: user
-    };
+    let user = await db.User.createUser(
+        data.username,
+        data.password,
+        data.email
+    );
+    user = await prepareUser(user);
+    return user;
 };
 
 const createToken = async (user) => {
     let token = await user.refreshToken();
-    return {
-        status: 200,
-        data: token
-    };
+    token = prepareToken(token);
+    return token;
 };
 
 const changeProfile = async (user, data) => {
     let changed_user = await user.update(
         data
     );
-    return {
-        status: 200,
-        data: changed_user
-    };
+    changed_user = await prepareUser(user);
+    return changed_user;
 };
 
 const getUserInfo = async (user) => {
-    return {
-        status: 200,
-        data: await user.toJSON()
-    };
+    return await prepareUser(user);
 };
 
 const deleteUser = async (user) => {
-    return {
-        status: 200,
-        data: await user.delete()
-    };
+    let old_user = await prepareUser(user);
+    await user.destroy();
+    return old_user;
 };
 
 module.exports = {
