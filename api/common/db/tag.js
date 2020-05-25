@@ -5,7 +5,7 @@ const Tag = db.model(
     {
         tableName: 'tags',
         news() {
-            return this.belongsToMany('News', 'news_tags', 'news_id', 'tags_id');
+            return this.belongsToMany('News', 'news_tags', 'tag_id', 'news_id');
         }
     },
     {

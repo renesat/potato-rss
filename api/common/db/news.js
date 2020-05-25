@@ -1,11 +1,23 @@
 const {db} = require('./base');
+const {Tag} = require('./tag');
+
+const errors = require('../errors');
 
 const News = db.model(
     'News',
     {
+        initialize: function() {
+            this.on('fetching', (model, columns, options) => {
+                if (options.withRelated === undefined) {
+                    options.withRelated = ['tags'];
+                } else {
+                    options.withRelated = [...options.withRelated, 'tags'];
+                }
+            });
+        },
         tableName: 'news',
         tags() {
-            return this.belongsToMany('Tag', 'news_tags', 'tag_id', 'news_id');
+            return this.belongsToMany('Tag', 'news_tags', 'news_id', 'tag_id');
         },
         source() {
             return this.belongsTo('Source');
@@ -53,56 +65,59 @@ const News = db.model(
         getNews(news_id) {
             return new News({
                 id: news_id
-            }).fetch({withRelated: ['tags']}).then(news => {
+            }).fetch({require: false}).then(news => {
+                if (!news) {
+                    throw new errors.NotFoundPropertyError('news', news_id);
+                }
                 return news;
             });
         },
-        async getNewsList(sourceID = undefined, page = undefined) {
-            let sources;
-            if (sourceID) {
-                sources = [sourceID];
-            } else {
-                sources = User.getUserSources(newsID);
-            }
-
-            let whereParams = {};
-            if (sourceID) {
-                whereParams['source_id'] = sourceID;
-                await new Source({id: sourceID}).fetch().then(source => {
-                    return source;
-                });
-            }
-
-            let fetchParams = {withRelated: ['tags']};
-            if (page) {
-                fetchParams['page'] = page;
-            }
-            return News.where(
-                whereParams
-            ).orderBy('date', 'ASC').fetchPage(
-                fetchParams
-            ).then(newsList => {
-                return {
-                    items: newsList,
-                    isLastPage: newsList.pagination['page'] == newsList.pagination['pageCount'],
-                    page: newsList.pagination['page'],
-                    pageCount: newsList.pagination['pageCount']
-                };
-            });
-        },
         swapFavourite(news_id) {
-            return News.where({
-                id: news_id,
-            }).fetch().then(news => {
-                console.log(news.attributes.favourite);
+            return News.getNews(news_id).then(news => {
                 return news.save(
                     {favourite: !news.attributes.favourite},
                     {patch: true}
                 ).then(news => {
-                    return news.fetch({withRelated: ['tags']});
+                    return news.fetch();
                 });
             });
-        }
+        },
+        addTag(newsID, tagName) {
+            return News.getNews(newsID).then(async news => {
+                let tag = await new Tag({
+                    title: tagName
+                }).fetch({require: false}).then(tag => {
+                    return tag;
+                });
+                if (!tag) {
+                    tag = await new Tag({
+                        title: tagName
+                    }).save().then(tag => {
+                        return tag;
+                    });
+                }
+                if (news.related('tags').get(tag) === undefined) {
+                    await news.tags().attach(tag);
+                }
+                return News.getNews(newsID);
+            });
+        },
+        removeTag(newsID, tagName) {
+            return News.getNews(newsID).then(async news => {
+                let tag = await new Tag({
+                    title: tagName
+                }).fetch({require: false}).then(tag => {
+                    return tag;
+                });
+                if (!tag) {
+                    return news;
+                }
+                if (!(news.related('tags').get(tag) === undefined)) {
+                    await news.tags().detach(tag);
+                }
+                return News.getNews(newsID);
+            });
+        },
     }
 );
 

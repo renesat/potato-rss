@@ -1,6 +1,8 @@
 const {db} = require('./base');
 const {Auth} = require('./auth');
 const {Role} = require('./role');
+const {Source} = require('./source');
+const {News} = require('./news');
 
 const errors = require('../errors');
 
@@ -33,8 +35,38 @@ const User = db.model(
                 return user;
             });
         },
-        updateNews() {
-            // TODO
+        async getNewsList(sourceID = undefined, page = undefined) {
+            let sources;
+            if (sourceID) {
+                await Source.getInfo(
+                    this.id,
+                    sourceID
+                );
+                sources = await [sourceID];
+            } else {
+                sources = await Source.getUserSources(this.id).then(sources => {
+                    return sources.map(source => {
+                        return source.id;
+                    });
+                });
+            }
+
+            let whereParams = {};
+            whereParams['source_id'] = sources;
+
+            let fetchParams = {withRelated: ['tags']};
+            // fetchParams['debug'] = true;
+            if (page) {
+                fetchParams['page'] = page;
+            }
+
+            return News.query(
+                'where', 'source_id', 'in', sources
+            ).orderBy('date', 'ASC').fetchPage(
+                fetchParams
+            ).then(newsList => {
+                return newsList;
+            });
         },
         assertEmailUnique() {
             if (this.isNew() || this.hasChanged('email')) {

@@ -76,6 +76,7 @@ const Source = db.model(
                 user_id: user_id,
                 ...data
             }).save().then(source => {
+                Source.updateNews(source.id);
                 return source;
             });
         },

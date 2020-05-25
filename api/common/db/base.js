@@ -48,8 +48,6 @@ const createDB = (db) => {
             table.integer('user_id').notNullable().
                 references('users.id');
             table.string('title', 255).notNullable();
-            table.datetime('last_update');
-            table.text('last_update_status');
             table.string('description', 255);
             table.string('link', 255).notNullable();
         }).then(() => {

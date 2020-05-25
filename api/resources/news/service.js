@@ -1,107 +1,60 @@
 const db = require('../../common/db');
 
-const getNewsList = (sourceID, page) => {
-    return db.News.getNewsList(
+const prepareNews = (news) => {
+    let json_news = news.toJSON();
+    json_news['tags'] = json_news['tags'].map(tag => {
+        return tag.title;
+    });
+    return json_news;
+};
+
+const prepareNewsList = async (newsList) => {
+    return {
+        items: await newsList.map(prepareNews),
+        isLastPage: newsList.pagination['page'] >= newsList.pagination['pageCount'],
+        page: newsList.pagination['page'],
+        pageCount: newsList.pagination['pageCount']
+    };
+};
+
+const getNewsList = async (user, sourceID, page) => {
+    let newsList = await user.getNewsList(
         sourceID, page
-    ).then(newsList => {
-        if (page > newsList.pageCount) {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    massage: `Page ${page} not exist`
-                }
-            };
-        }
-        return {
-            status: 200,
-            data: newsList
-        };
-    }).catch(err => {
-        if (err.message === 'EmptyResponse') {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    message: `Not found source ${sourceID}`
-                }
-            };
-        } else {
-            throw err;
-        }
-    });
+    );
+    return prepareNewsList(newsList);
 };
 
-const getNews = (newsID) => {
-    return db.News.getNews(
+const getNews = async (newsID) => {
+    let news = await db.News.getNews(
         newsID
-    ).then(news => {
-        return {
-            status: 200,
-            data: news
-        };
-    }).catch(err => {
-        if (err.message === 'EmptyResponse') {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    message: `Not found news ${newsID}`
-                }
-            };
-        } else {
-            throw err;
-        }
-    });
+    );
+    return prepareNews(news);
 };
 
-const swapFavourite = (newsID) => {
-    return db.News.swapFavourite(
-        news_id
-    ).then(news => {
-        return {
-            status: 200,
-            data: news
-        };
-    }).catch(err => {
-        if (err.message === 'EmptyResponse') {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    message: `Not found news ${news_id}`
-                }
-            };
-        } else {
-            throw err;
-        }
-    });
+const swapFavourite = async (newsID) => {
+    let news = await db.News.swapFavourite(
+        newsID
+    );
+    return prepareNews(news);
 };
 
-const addTag = (newsID, tagName) => {
-    return db.News.addTag(
+const addTag = async (newsID, tagName) => {
+    let news = await db.News.addTag(
         newsID, tagName
-    ).then(news => {
-        return {
-            status: 200,
-            data: news
-        };
-    }).catch(err => {
-        if (err.message === 'EmptyResponse') {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    message: `Not found news ${newsID}`
-                }
-            };
-        } else {
-            throw err;
-        }
-    });
+    );
+    return prepareNews(news);
 };
+
+const removeTag = async (newsID, tagName) => {
+    let news = await db.News.removeTag(
+        newsID, tagName
+    );
+    return prepareNews(news);
+};
+
 
 module.exports.getNewsList = getNewsList;
 module.exports.getNews = getNews;
 module.exports.swapFavourite =  swapFavourite;
 module.exports.addTag = addTag;
+module.exports.removeTag = removeTag;
