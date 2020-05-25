@@ -19,7 +19,7 @@ class NotFoundPropertyError extends RequestError {
     constructor(property, value, status=400) {
         super(
             'NOT_FOUND_PROPERTY',
-            `Not found "${property}" = "${value}"`,
+            `Not found '${property}' = '${value}'`,
             status
         );
     }
@@ -49,7 +49,7 @@ class PropertyExistsError extends RequestError {
     constructor(property, value, status=400) {
         super(
             'PROPERTY_EXISTS',
-            `"${property}" = "${value} exist"`,
+            `'${property}' = '${value} exist'`,
             status
         );
     }
