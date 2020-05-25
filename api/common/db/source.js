@@ -4,16 +4,26 @@ const intel = require('intel');
 
 const {News} = require('./news');
 
+const errors = require('../errors');
+
 const Source = db.model(
     'Source',
     {
         tableName: 'sources',
+        initialize: function() {
+            this.on('destroying', this.destroySourceData);
+        },
         news() {
             return this.hasMany('News');
         },
         user() {
             return this.belongsTo('User');
-        }
+        },
+        async destroySourceData() {
+            await this.related('news').fetch().then(news =>{
+                news.invokeMap('destroy');
+            });
+        },
     },
     {
         updateNews(source_id = undefined) {
@@ -46,18 +56,18 @@ const Source = db.model(
             });
         },
         updateSource(user_id, id_source, data) {
-            return new Source({
-                id: id_source,
-                user_id: user_id
-            }).save(data, {patch: true}).then(source => {
-                return source;
+            return this.getInfo(user_id, id_source).then(source => {
+                return source.save(data, {patch: true});
             });
         },
         getInfo(user_id, id_source) {
             return new Source({
                 id: id_source,
                 user_id: user_id
-            }).fetch({require: true}).then(source => {
+            }).fetch({require: false}).then(source => {
+                if (!source) {
+                    throw new errors.NotFoundPropertyError('source', id_source);
+                }
                 return source;
             });
         },
@@ -69,21 +79,13 @@ const Source = db.model(
                 return source;
             });
         },
-        getUserSources(user_id) {
+        getUserSources(userID) {
             return Source.where({
-                user_id: user_id
+                user_id: userID
             }).fetchAll().then(sources => {
                 return sources;
             });
         },
-        deleteSource(idSource) {
-            return new Source({
-                id: idSource
-            }).fetch().then(source => {
-                source.destroy();
-                return source;
-            });
-        }
     }
 );
 

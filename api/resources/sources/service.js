@@ -1,91 +1,54 @@
 const db = require('../../common/db');
 
+const prepareSource = async (source) => {
+    return source.toJSON();
+};
+
 const getSourcesList = async (user) => {
-    return db.Source.getUserSources(
+    let sources = await db.Source.getUserSources(
         user.id
-    ).then(sourceList => {
-        return {
-            status: 200,
-            data: sourceList
-        };
-    });
+    );
+    await sources.map(prepareSource);
+    return sources;
 };
 
 const addSource = async (user, data) => {
-    return db.Source.createSource(
+    let source = await db.Source.createSource(
         user.id,
         data
-    ).then(source => {
-        db.Source.updateNews(source.id);
-        return {
-            status: 200,
-            data: source
-        };
-    });
+    );
+    source = await prepareSource(source);
+    return source;
 };
 
 const getSource = async (user, id_source) => {
-    return await db.Source.getInfo(
+    let source = await db.Source.getInfo(
         user.id,
         id_source
-    ).then(source => {
-        return {
-            status: 200,
-            data: source
-        };
-    }).catch(err => {
-        if (err.message === 'EmptyResponse') {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    message: `Not found source ${id_source}`
-                }
-            };
-        } else {
-            throw err;
-        }
-    });
+    );
+    source = await prepareSource(source);
+    return source;
 };
 
-const changeSource = (user, id_source, data) => {
-    delete data._id;
-    delete data.id;
-    return db.Source.updateSource(
+const changeSource = async (user, id_source, data) => {
+    let source = await db.Source.updateSource(
         user.id,
         id_source,
         data
-    ).then(source => {
-        return {
-            status: 200,
-            data: source
-        };
-    }).catch(err => {
-        if (err.message === 'EmptyResponse') {
-            return {
-                status: 400,
-                data: {
-                    error: 'not_found',
-                    message: `Not found source ${id_source}`
-                }
-            };
-        } else {
-            throw err;
-        }
-    });
+    );
+    source = await prepareSource(source);
+    return source;
 };
 
-const deleteSource = (idSource) => {
-    return db.Source.deleteSource(
-        idSource
-    ).then(source => {
-        return {
-            status: 200,
-            data: source
-        };
-    });
+const deleteSource = async (user, sourceID) => {
+    let source = await db.Source.getInfo(
+        user.id,
+        sourceID
+    );
+    let deleted_source =  prepareSource(source);
+    source.destroy();
+    return deleted_source;
 };
-
 
 module.exports.getSourcesList = getSourcesList;
 module.exports.addSource = addSource;

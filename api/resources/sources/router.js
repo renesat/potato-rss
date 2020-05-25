@@ -2,58 +2,47 @@ const {Router}= require('express');
 const service = require('./service');
 const passport = require('passport');
 const {notFoundPage} = require('../../common/pages');
+const {errorWrapper} = require('../../common/errors');
 
 const getSources = async (req, res, next) => {
-    await service.getSourcesList(
+
+    let sources = await service.getSourcesList(
         req.user
-    ).then(result => {
-        res.status(result.status).json(result.data);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(sources);
 };
 
 const addSource = async (req, res, next) => {
-    await service.addSource(
+    let source = await service.addSource(
         req.user,
         req.body
-    ).then(result => {
-        res.status(result.status).json(result.data);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(source);
 };
 
 const getSource = async (req, res, next) => {
-    await service.getSource(
+    let source = await service.getSource(
         req.user,
         req.params.sourceID
-    ).then(result => {
-        res.status(result.status).json(result.data);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(source);
 };
 
 const changeSource = async (req, res, next) => {
-    await service.changeSource(
+    let source = await service.changeSource(
+        req.user,
         req.params.sourceID,
         req.body
-    ).then(result => {
-        res.status(result.status).json(result.data);
-    }).catch(err => {
-        next(err);
-    });
+    );
+    res.status(200).json(source);
 };
 
 const deleteSource = async (req, res, next) => {
-    await service.deleteSource(
-        req.params.sourceID
-    ).then(result => {
-        res.status(result.status).json(result.data);
-    }).catch(err => {
-        next(err);
-    });
+    let source = await service.deleteSource(
+        req.user,
+        req.params.sourceID,
+    );
+    res.status(200).json(source);
 };
 
 const notExistError = async (req, res) => {
@@ -83,28 +72,28 @@ router.all(
 // );
 router.all(
     '/sources/update',
-    notExistError
+    errorWrapper(notExistError)
 );
 
 
 router.get(
     '/sources/:sourceID',
     passport.authenticate('bearer', { session: false }),
-    getSource
+    errorWrapper(getSource)
 );
 router.put(
     '/sources/:sourceID',
     passport.authenticate('bearer', { session: false }),
-    changeSource
+    errorWrapper(changeSource)
 );
 router.delete(
     '/sources/:sourceID',
     passport.authenticate('bearer', { session: false }),
-    deleteSource
+    errorWrapper(deleteSource)
 );
 router.all(
     '/sources/:sourceID',
-    notExistError
+    errorWrapper(notExistError)
 );
 
 module.exports = router;
